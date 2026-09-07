@@ -14,7 +14,8 @@ const String _panelRoute = '/assistant-panel';
 class AssistantNavigatorObserver extends NavigatorObserver {
   AssistantNavigatorObserver._();
 
-  static final AssistantNavigatorObserver instance = AssistantNavigatorObserver._();
+  static final AssistantNavigatorObserver instance =
+      AssistantNavigatorObserver._();
 
   final ValueNotifier<int> revision = ValueNotifier(0);
   bool _shouldHide = false;
@@ -23,44 +24,77 @@ class AssistantNavigatorObserver extends NavigatorObserver {
 
   void _update(Route<dynamic>? top) {
     final name = top?.settings.name;
-    _shouldHide = name == _splashRoute || name == _panelRoute || name == AssistantScreen.routeName;
+    _shouldHide = name == _splashRoute ||
+        name == _panelRoute ||
+        name == AssistantScreen.routeName;
     revision.value++;
   }
 
   @override
-  void didPush(Route<dynamic> route, Route<dynamic>? previousRoute) => _update(route);
+  void didPush(Route<dynamic> route, Route<dynamic>? previousRoute) =>
+      _update(route);
 
   @override
-  void didPop(Route<dynamic> route, Route<dynamic>? previousRoute) => _update(previousRoute);
+  void didPop(Route<dynamic> route, Route<dynamic>? previousRoute) =>
+      _update(previousRoute);
 
   @override
-  void didRemove(Route<dynamic> route, Route<dynamic>? previousRoute) => _update(previousRoute);
+  void didRemove(Route<dynamic> route, Route<dynamic>? previousRoute) =>
+      _update(previousRoute);
 
   @override
-  void didReplace({Route<dynamic>? newRoute, Route<dynamic>? oldRoute}) => _update(newRoute);
+  void didReplace({Route<dynamic>? newRoute, Route<dynamic>? oldRoute}) =>
+      _update(newRoute);
 }
 
 /// App-wide wrapper (MaterialApp.builder) that floats the assistant chat
-/// bubble above every page.
-class AssistantOverlay extends StatelessWidget {
+/// bubble above every page. The bubble can be dragged anywhere on screen.
+class AssistantOverlay extends StatefulWidget {
   final Widget child;
 
   const AssistantOverlay({super.key, required this.child});
 
   @override
+  State<AssistantOverlay> createState() => _AssistantOverlayState();
+}
+
+class _AssistantOverlayState extends State<AssistantOverlay> {
+  static const double _bubbleSize = 54;
+  Offset _bubblePos = const Offset(16, 0);
+  bool _initialized = false;
+
+  @override
   Widget build(BuildContext context) {
+    final padding = MediaQuery.paddingOf(context);
+    final size = MediaQuery.sizeOf(context);
+    if (!_initialized) {
+      _initialized = true;
+      _bubblePos = Offset(16, size.height - padding.bottom - _bubbleSize - 92);
+    }
     return Stack(
       fit: StackFit.expand,
       children: [
-        child,
+        widget.child,
         ValueListenableBuilder<int>(
           valueListenable: AssistantNavigatorObserver.instance.revision,
           builder: (context, _, __) {
-            if (AssistantNavigatorObserver.instance.shouldHide) return const SizedBox.shrink();
+            if (AssistantNavigatorObserver.instance.shouldHide)
+              return const SizedBox.shrink();
             return Positioned(
-              left: 16,
-              bottom: MediaQuery.paddingOf(context).bottom + 92,
-              child: const _AssistantBubble(),
+              left: _bubblePos.dx,
+              top: _bubblePos.dy,
+              child: _AssistantBubble(
+                onDragUpdate: (details) {
+                  setState(() {
+                    _bubblePos = Offset(
+                      (_bubblePos.dx + details.delta.dx)
+                          .clamp(8.0, size.width - _bubbleSize - 8),
+                      (_bubblePos.dy + details.delta.dy).clamp(padding.top + 8,
+                          size.height - padding.bottom - _bubbleSize - 12),
+                    );
+                  });
+                },
+              ),
             );
           },
         ),
@@ -70,47 +104,54 @@ class AssistantOverlay extends StatelessWidget {
 }
 
 class _AssistantBubble extends StatelessWidget {
-  const _AssistantBubble();
+  final GestureDragUpdateCallback onDragUpdate;
+
+  const _AssistantBubble({required this.onDragUpdate});
 
   @override
   Widget build(BuildContext context) {
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        customBorder: const CircleBorder(),
-        onTap: () => appNavigatorKey.currentState?.push(AssistantPanelRoute()),
-        child: Container(
-          width: 54,
-          height: 54,
-          decoration: BoxDecoration(
-            gradient: const LinearGradient(colors: AppColors.brandGradient),
-            shape: BoxShape.circle,
-            boxShadow: [
-              BoxShadow(
-                color: AppColors.primary.withValues(alpha: 0.35),
-                blurRadius: 16,
-                offset: const Offset(0, 6),
-              ),
-            ],
-          ),
-          child: Stack(
-            alignment: Alignment.center,
-            children: [
-              const Icon(Icons.smart_toy_outlined, color: Colors.white, size: 27),
-              Positioned(
-                right: 3,
-                bottom: 3,
-                child: Container(
-                  width: 13,
-                  height: 13,
-                  decoration: BoxDecoration(
-                    color: AppColors.income,
-                    shape: BoxShape.circle,
-                    border: Border.all(color: Colors.white, width: 2),
+    return GestureDetector(
+      onPanUpdate: onDragUpdate,
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          customBorder: const CircleBorder(),
+          onTap: () =>
+              appNavigatorKey.currentState?.push(AssistantPanelRoute()),
+          child: Container(
+            width: _AssistantOverlayState._bubbleSize,
+            height: _AssistantOverlayState._bubbleSize,
+            decoration: BoxDecoration(
+              gradient: const LinearGradient(colors: AppColors.brandGradient),
+              shape: BoxShape.circle,
+              boxShadow: [
+                BoxShadow(
+                  color: AppColors.primary.withValues(alpha: 0.35),
+                  blurRadius: 16,
+                  offset: const Offset(0, 6),
+                ),
+              ],
+            ),
+            child: Stack(
+              alignment: Alignment.center,
+              children: [
+                const Icon(Icons.smart_toy_outlined,
+                    color: Colors.white, size: 27),
+                Positioned(
+                  right: 3,
+                  bottom: 3,
+                  child: Container(
+                    width: 13,
+                    height: 13,
+                    decoration: BoxDecoration(
+                      color: AppColors.income,
+                      shape: BoxShape.circle,
+                      border: Border.all(color: Colors.white, width: 2),
+                    ),
                   ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),
@@ -128,11 +169,15 @@ class AssistantPanelRoute extends PageRouteBuilder<void> {
           barrierDismissible: true,
           transitionDuration: const Duration(milliseconds: 280),
           reverseTransitionDuration: const Duration(milliseconds: 220),
-          pageBuilder: (context, animation, secondaryAnimation) => const _AssistantPanel(),
+          pageBuilder: (context, animation, secondaryAnimation) =>
+              const _AssistantPanel(),
           transitionsBuilder: (context, animation, secondaryAnimation, child) {
-            final curved = CurvedAnimation(parent: animation, curve: Curves.easeOutCubic);
+            final curved =
+                CurvedAnimation(parent: animation, curve: Curves.easeOutCubic);
             return SlideTransition(
-              position: Tween<Offset>(begin: const Offset(0, 1), end: Offset.zero).animate(curved),
+              position:
+                  Tween<Offset>(begin: const Offset(0, 1), end: Offset.zero)
+                      .animate(curved),
               child: child,
             );
           },
@@ -145,7 +190,9 @@ class _AssistantPanel extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final viewInsets = MediaQuery.viewInsetsOf(context);
-    final surface = Theme.of(context).brightness == Brightness.dark ? AppColors.surfaceDark : Colors.white;
+    final surface = Theme.of(context).brightness == Brightness.dark
+        ? AppColors.surfaceDark
+        : Colors.white;
 
     return Padding(
       padding: EdgeInsets.only(top: 56, bottom: viewInsets.bottom),
@@ -169,7 +216,8 @@ class _AssistantPanel extends StatelessWidget {
       padding: const EdgeInsets.fromLTRB(16, 12, 6, 12),
       decoration: BoxDecoration(
         border: Border(
-          bottom: BorderSide(color: Theme.of(context).dividerColor.withValues(alpha: 0.5)),
+          bottom: BorderSide(
+              color: Theme.of(context).dividerColor.withValues(alpha: 0.5)),
         ),
       ),
       child: Row(
@@ -181,15 +229,21 @@ class _AssistantPanel extends StatelessWidget {
               gradient: LinearGradient(colors: AppColors.brandGradient),
               shape: BoxShape.circle,
             ),
-            child: const Icon(Icons.smart_toy_outlined, color: Colors.white, size: 19),
+            child: const Icon(Icons.smart_toy_outlined,
+                color: Colors.white, size: 19),
           ),
           const SizedBox(width: 10),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text('TrackMe CSR', style: TextStyle(fontWeight: FontWeight.w700, fontSize: 13.5)),
-                Text('Online · replies instantly & logs expenses', style: TextStyle(fontSize: 11.5, color: Theme.of(context).textTheme.bodySmall!.color)),
+                const Text('TrackMe CSR',
+                    style:
+                        TextStyle(fontWeight: FontWeight.w700, fontSize: 13.5)),
+                Text('Online · replies instantly & logs expenses',
+                    style: TextStyle(
+                        fontSize: 11.5,
+                        color: Theme.of(context).textTheme.bodySmall!.color)),
               ],
             ),
           ),
