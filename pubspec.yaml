@@ -53,6 +53,7 @@ dependencies:
   google_mlkit_text_recognition: ^0.15.0
   video_player: ^2.10.0
   video_player_win: ^3.2.2
+  flutter_svg: ^2.0.10
 
 dev_dependencies:
   flutter_test:
@@ -80,6 +81,7 @@ flutter:
   assets:
     - assets/icon/app_icon.png
     - assets/video/Loading_screen.mp4
+    - assets/payment_methods/
 
 flutter_launcher_icons:
   android: true

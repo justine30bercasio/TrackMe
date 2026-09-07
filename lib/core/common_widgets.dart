@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:intl/intl.dart';
 
 import 'package:track_me/core/payment_methods.dart';
@@ -141,23 +142,45 @@ class PaymentMethodBadge extends StatelessWidget {
     final radius = size * 0.28;
     final icon = info?.icon;
     final monogram = info?.monogram;
-    final shape = Container(
-      width: size,
-      height: size,
-      decoration: BoxDecoration(
-        color: bg,
-        borderRadius: BorderRadius.circular(radius),
-      ),
-      alignment: Alignment.center,
-      child: icon != null
-          ? Icon(icon, color: fg, size: size * 0.58)
-          : Text(
-              monogram ?? (code.isEmpty ? '?' : code[0].toUpperCase()),
-              style: TextStyle(color: fg, fontSize: size * (monogram != null && monogram.length > 2 ? 0.26 : 0.42), fontWeight: FontWeight.w800),
-              maxLines: 1,
-              textAlign: TextAlign.center,
-            ),
-    );
+    final assetIcon = info?.assetIcon;
+    Container shape;
+    if (assetIcon != null) {
+      shape = Container(
+        width: size,
+        height: size,
+        clipBehavior: Clip.antiAlias,
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(radius),
+        ),
+        alignment: Alignment.center,
+        padding: EdgeInsets.all(size * 0.12),
+        child: SvgPicture.asset(
+          assetIcon,
+          fit: BoxFit.contain,
+          width: size * 0.76,
+          height: size * 0.76,
+        ),
+      );
+    } else {
+      shape = Container(
+        width: size,
+        height: size,
+        decoration: BoxDecoration(
+          color: bg,
+          borderRadius: BorderRadius.circular(radius),
+        ),
+        alignment: Alignment.center,
+        child: icon != null
+            ? Icon(icon, color: fg, size: size * 0.58)
+            : Text(
+                monogram ?? (code.isEmpty ? '?' : code[0].toUpperCase()),
+                style: TextStyle(color: fg, fontSize: size * (monogram != null && monogram.length > 2 ? 0.26 : 0.42), fontWeight: FontWeight.w800),
+                maxLines: 1,
+                textAlign: TextAlign.center,
+              ),
+      );
+    }
     if (!outlined) return shape;
     return Container(
       padding: const EdgeInsets.all(2),

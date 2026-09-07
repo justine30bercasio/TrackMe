@@ -7,6 +7,7 @@ class PaymentMethodInfo {
   final Color brandColor;
   final String? monogram;
   final IconData? icon;
+  final String? assetIcon;
 
   const PaymentMethodInfo({
     required this.code,
@@ -15,6 +16,7 @@ class PaymentMethodInfo {
     required this.brandColor,
     this.monogram,
     this.icon,
+    this.assetIcon,
   });
 }
 
@@ -26,22 +28,22 @@ const List<PaymentMethodInfo> paymentMethods = [
   PaymentMethodInfo(code: 'check', label: 'Check', group: 'core', brandColor: Color(0xFF7C3AED), monogram: '✓', icon: Icons.note_alt),
   PaymentMethodInfo(code: 'other', label: 'Other', group: 'core', brandColor: Color(0xFF6B7280), monogram: '…', icon: Icons.more_horiz),
 
-  PaymentMethodInfo(code: 'gcash', label: 'GCash', group: 'wallet', brandColor: Color(0xFF007DFE), monogram: 'G'),
-  PaymentMethodInfo(code: 'maya', label: 'Maya', group: 'wallet', brandColor: Color(0xFF22A7F0), monogram: 'M'),
-  PaymentMethodInfo(code: 'coins_ph', label: 'Coins.ph', group: 'wallet', brandColor: Color(0xFFFFC107), monogram: 'c'),
-  PaymentMethodInfo(code: 'shopeepay', label: 'ShopeePay', group: 'wallet', brandColor: Color(0xFFEE4D2D), monogram: 'SP'),
-  PaymentMethodInfo(code: 'grabpay', label: 'GrabPay', group: 'wallet', brandColor: Color(0xFF00B14F), monogram: 'G'),
-  PaymentMethodInfo(code: 'paypal', label: 'PayPal', group: 'wallet', brandColor: Color(0xFF003087), monogram: 'P'),
-  PaymentMethodInfo(code: 'lazada_wallet', label: 'Lazada Wallet', group: 'wallet', brandColor: Color(0xFF0F1568), monogram: 'L'),
+  PaymentMethodInfo(code: 'gcash', label: 'GCash', group: 'wallet', brandColor: Color(0xFF007DFE), monogram: 'G', assetIcon: 'assets/payment_methods/gcash.svg'),
+  PaymentMethodInfo(code: 'maya', label: 'Maya', group: 'wallet', brandColor: Color(0xFF22A7F0), monogram: 'M', assetIcon: 'assets/payment_methods/maya.svg'),
+  PaymentMethodInfo(code: 'coins_ph', label: 'Coins.ph', group: 'wallet', brandColor: Color(0xFFFFC107), monogram: 'c', assetIcon: 'assets/payment_methods/coins_ph.svg'),
+  PaymentMethodInfo(code: 'shopeepay', label: 'ShopeePay', group: 'wallet', brandColor: Color(0xFFEE4D2D), monogram: 'SP', assetIcon: 'assets/payment_methods/shopeepay.svg'),
+  PaymentMethodInfo(code: 'grabpay', label: 'GrabPay', group: 'wallet', brandColor: Color(0xFF00B14F), monogram: 'G', assetIcon: 'assets/payment_methods/grabpay.svg'),
+  PaymentMethodInfo(code: 'paypal', label: 'PayPal', group: 'wallet', brandColor: Color(0xFF003087), monogram: 'P', assetIcon: 'assets/payment_methods/paypal.svg'),
+  PaymentMethodInfo(code: 'lazada_wallet', label: 'Lazada Wallet', group: 'wallet', brandColor: Color(0xFF0F1568), monogram: 'L', assetIcon: 'assets/payment_methods/lazada_wallet.svg'),
   PaymentMethodInfo(code: 'g_shop', label: 'GShope', group: 'wallet', brandColor: Color(0xFF42B549), monogram: 'GS'),
   PaymentMethodInfo(code: 'shopee_voucher', label: 'Shopee Voucher', group: 'wallet', brandColor: Color(0xFFFF8F00), monogram: 'V'),
 
   PaymentMethodInfo(code: 'bpi', label: 'BPI', group: 'bank', brandColor: Color(0xFF1E88E5), monogram: 'BPI'),
   PaymentMethodInfo(code: 'bdo', label: 'BDO', group: 'bank', brandColor: Color(0xFF0F69BA), monogram: 'BDO'),
   PaymentMethodInfo(code: 'unionbank', label: 'UnionBank', group: 'bank', brandColor: Color(0xFFEE0E08), monogram: 'UB'),
-  PaymentMethodInfo(code: 'gotyme', label: 'GoTyme', group: 'bank', brandColor: Color(0xFF00AD4B), monogram: 'GT'),
+  PaymentMethodInfo(code: 'gotyme', label: 'GoTyme', group: 'bank', brandColor: Color(0xFF00AD4B), monogram: 'GT', assetIcon: 'assets/payment_methods/gotyme.svg'),
   PaymentMethodInfo(code: 'rcbc', label: 'RCBC', group: 'bank', brandColor: Color(0xFF0052A5), monogram: 'RCBC'),
-  PaymentMethodInfo(code: 'eastwest', label: 'EastWest', group: 'bank', brandColor: Color(0xFFFFC72C), monogram: 'EW'),
+  PaymentMethodInfo(code: 'eastwest', label: 'EastWest', group: 'bank', brandColor: Color(0xFFFFC72C), monogram: 'EW', assetIcon: 'assets/payment_methods/eastwest.svg'),
   PaymentMethodInfo(code: 'security_bank', label: 'Security Bank', group: 'bank', brandColor: Color(0xFFF07818), monogram: 'SB'),
   PaymentMethodInfo(code: 'metrobank', label: 'Metrobank', group: 'bank', brandColor: Color(0xFF003767), monogram: 'MB'),
   PaymentMethodInfo(code: 'landbank', label: 'Landbank', group: 'bank', brandColor: Color(0xFFE4002B), monogram: 'LBP'),
