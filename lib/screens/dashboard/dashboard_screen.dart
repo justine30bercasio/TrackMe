@@ -585,7 +585,10 @@ Expanded(
                   child: _QuickLinkCard(
                     icon: Icons.smart_toy_outlined,
                     label: 'Assistant',
-                    onTap: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const AssistantScreen())),
+                    onTap: () => Navigator.of(context).push(MaterialPageRoute(
+                      settings: const RouteSettings(name: AssistantScreen.routeName),
+                      builder: (_) => const AssistantScreen(),
+                    )),
                   ),
                 ),
                 const SizedBox(width: 12),

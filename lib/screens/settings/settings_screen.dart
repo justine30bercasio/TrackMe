@@ -70,7 +70,10 @@ class SettingsScreen extends StatelessWidget {
                 icon: Icons.smart_toy_outlined,
                 title: 'TrackMe Assistant',
                 subtitle: 'Chat, and it auto-logs your expenses & income',
-                onTap: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const AssistantScreen())),
+                onTap: () => Navigator.of(context).push(MaterialPageRoute(
+                  settings: const RouteSettings(name: AssistantScreen.routeName),
+                  builder: (_) => const AssistantScreen(),
+                )),
               ),
               _SettingsTile(
                 icon: Icons.document_scanner_outlined,

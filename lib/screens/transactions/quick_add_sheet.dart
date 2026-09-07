@@ -13,7 +13,14 @@ class QuickAddSheet extends StatelessWidget {
 
   void _open(BuildContext context, Widget screen) {
     Navigator.pop(context);
-    Navigator.of(context).push(MaterialPageRoute(builder: (_) => screen));
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        settings: screen is AssistantScreen
+            ? const RouteSettings(name: AssistantScreen.routeName)
+            : null,
+        builder: (_) => screen,
+      ),
+    );
   }
 
   @override
