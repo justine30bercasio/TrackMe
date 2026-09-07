@@ -50,7 +50,7 @@ const List<PaymentMethodInfo> paymentMethods = [
   PaymentMethodInfo(code: 'pnb', label: 'PNB', group: 'bank', brandColor: Color(0xFFC8102E), monogram: 'PNB'),
   PaymentMethodInfo(code: 'psbank', label: 'PSBank', group: 'bank', brandColor: Color(0xFF00477C), monogram: 'PS', icon: Icons.account_balance),
   PaymentMethodInfo(code: 'chinabank', label: 'China Bank', group: 'bank', brandColor: Color(0xFFD50032), monogram: 'CB'),
-  PaymentMethodInfo(code: 'cimb', label: 'CIMB', group: 'bank', brandColor: Color(0xFFFF8900), monogram: 'CIMB'),
+  PaymentMethodInfo(code: 'cimb', label: 'CIMB', group: 'bank', brandColor: Color(0xFFFF8900), monogram: 'CIMB', assetIcon: 'assets/payment_methods/cimb.svg'),
   PaymentMethodInfo(code: 'tonik', label: 'Tonik', group: 'bank', brandColor: Color(0xFF3AA0FF), monogram: 'T'),
   PaymentMethodInfo(code: 'banko', label: 'Banko', group: 'bank', brandColor: Color(0xFF7C4A2D), monogram: 'BO'),
   PaymentMethodInfo(code: 'coop_bank', label: 'Coop Bank', group: 'bank', brandColor: Color(0xFF2E7D32), monogram: 'CB'),
