@@ -46,16 +46,22 @@ class _NetWorthScreenState extends State<NetWorthScreen> {
         ['All-time expenses', data.totalExpenses],
         [''],
         ['Month', 'Income', 'Expenses', 'Net'],
-        ...data.breakdown.map((b) => <Object>[b.label, b.income, b.expenses, b.net]),
+        ...data.breakdown
+            .map((b) => <Object>[b.label, b.income, b.expenses, b.net]),
       ];
-      final bytes = utf8.encode('\uFEFF${const ListToCsvConverter().convert(rows)}');
+      final bytes =
+          utf8.encode('\uFEFF${const ListToCsvConverter().convert(rows)}');
       await Share.shareXFiles(
-        [XFile.fromData(bytes, mimeType: 'text/csv', name: 'net_worth_$_year.csv')],
+        [
+          XFile.fromData(bytes,
+              mimeType: 'text/csv', name: 'net_worth_$_year.csv')
+        ],
         text: 'TrackMe net worth $_year',
       );
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Could not export CSV: $e')));
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text('Could not export CSV: $e')));
       }
     }
   }
@@ -106,29 +112,37 @@ class _NetWorthScreenState extends State<NetWorthScreen> {
           return ListView(
             padding: const EdgeInsets.fromLTRB(20, 8, 20, 32),
             children: [
-              Container(
-                padding: const EdgeInsets.all(22),
-                decoration: BoxDecoration(
-                  gradient: const LinearGradient(colors: [Color(0xFF0F172A), Color(0xFF334155)]),
-                  borderRadius: BorderRadius.circular(24),
-                ),
+              BrandHeroCard(
+                tone: HeroCardTone.navy,
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text('Current net worth · $_year', style: const TextStyle(color: Colors.white70, fontSize: 13)),
+                    Text('Current net worth · $_year',
+                        style: const TextStyle(
+                            color: AppColors.onHeroMuted, fontSize: 13)),
                     const SizedBox(height: 6),
                     Text(
                       '${positive ? '' : '-'}${currencySymbol(currency)}${data.currentNetWorth.abs().toStringAsFixed(2)}',
-                      style: const TextStyle(color: Colors.white, fontSize: 30, fontWeight: FontWeight.w800, letterSpacing: -0.5),
+                      style: const TextStyle(
+                          color: AppColors.onHero,
+                          fontSize: 30,
+                          fontWeight: FontWeight.w800,
+                          letterSpacing: -0.5),
                     ),
                     const SizedBox(height: 14),
                     Row(
                       children: [
                         Expanded(
-                          child: _MiniStat(label: 'All-time income', value: formatMoney(data.totalIncome, currency), color: const Color(0xFF7CFFD8)),
+                          child: _MiniStat(
+                              label: 'All-time income',
+                              value: formatMoney(data.totalIncome, currency),
+                              color: const Color(0xFF7CFFD8)),
                         ),
                         Expanded(
-                          child: _MiniStat(label: 'All-time expenses', value: formatMoney(data.totalExpenses, currency), color: const Color(0xFFFFB7C5)),
+                          child: _MiniStat(
+                              label: 'All-time expenses',
+                              value: formatMoney(data.totalExpenses, currency),
+                              color: const Color(0xFFFFB7C5)),
                         ),
                       ],
                     ),
@@ -136,7 +150,8 @@ class _NetWorthScreenState extends State<NetWorthScreen> {
                 ),
               ),
               const SizedBox(height: 22),
-              Text('$_year monthly breakdown', style: Theme.of(context).textTheme.titleMedium),
+              Text('$_year monthly breakdown',
+                  style: Theme.of(context).textTheme.titleMedium),
               const SizedBox(height: 12),
               AppCard(
                 padding: const EdgeInsets.all(16),
@@ -149,28 +164,43 @@ class _NetWorthScreenState extends State<NetWorthScreen> {
                     const SizedBox(height: 16),
                     SizedBox(
                       height: 200,
-                      child: _MonthlyChart(breakdown: data.breakdown, currency: currency),
+                      child: _MonthlyChart(
+                          breakdown: data.breakdown, currency: currency),
                     ),
                   ],
                 ),
               ),
               const SizedBox(height: 22),
-              Text('Monthly detail', style: Theme.of(context).textTheme.titleMedium),
+              Text('Monthly detail',
+                  style: Theme.of(context).textTheme.titleMedium),
               const SizedBox(height: 10),
               ...data.breakdown.map((b) => AppCard(
                     margin: const EdgeInsets.only(bottom: 8),
-                    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 14, vertical: 10),
                     child: Row(
                       children: [
                         Expanded(
-                          child: Text(b.label, style: const TextStyle(fontSize: 13.5, fontWeight: FontWeight.w600), maxLines: 1, overflow: TextOverflow.ellipsis),
+                          child: Text(b.label,
+                              style: const TextStyle(
+                                  fontSize: 13.5, fontWeight: FontWeight.w600),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis),
                         ),
                         Flexible(
-                          child: Text(formatMoney(b.income, currency), style: const TextStyle(fontSize: 12, color: AppColors.income), maxLines: 1, overflow: TextOverflow.ellipsis),
+                          child: Text(formatMoney(b.income, currency),
+                              style: const TextStyle(
+                                  fontSize: 12, color: AppColors.income),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis),
                         ),
                         const SizedBox(width: 10),
                         Flexible(
-                          child: Text(formatMoney(b.expenses, currency), style: const TextStyle(fontSize: 12, color: AppColors.expense), maxLines: 1, overflow: TextOverflow.ellipsis),
+                          child: Text(formatMoney(b.expenses, currency),
+                              style: const TextStyle(
+                                  fontSize: 12, color: AppColors.expense),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis),
                         ),
                         const SizedBox(width: 10),
                         SizedBox(
@@ -181,7 +211,9 @@ class _NetWorthScreenState extends State<NetWorthScreen> {
                             style: TextStyle(
                               fontSize: 12.5,
                               fontWeight: FontWeight.w800,
-                              color: b.net >= 0 ? AppColors.income : AppColors.expense,
+                              color: b.net >= 0
+                                  ? AppColors.income
+                                  : AppColors.expense,
                             ),
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
@@ -202,18 +234,22 @@ class _MiniStat extends StatelessWidget {
   final String label;
   final String value;
   final Color color;
-  const _MiniStat({required this.label, required this.value, required this.color});
+  const _MiniStat(
+      {required this.label, required this.value, required this.color});
 
   @override
   Widget build(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(label, style: const TextStyle(color: Colors.white70, fontSize: 11)),
+        Text(label,
+            style: const TextStyle(color: AppColors.onHeroMuted, fontSize: 11)),
         const SizedBox(height: 4),
         FittedBox(
           fit: BoxFit.scaleDown,
-          child: Text(value, style: TextStyle(color: color, fontWeight: FontWeight.w800, fontSize: 14)),
+          child: Text(value,
+              style: TextStyle(
+                  color: color, fontWeight: FontWeight.w800, fontSize: 14)),
         ),
       ],
     );
@@ -229,9 +265,14 @@ class _LegendDot extends StatelessWidget {
   Widget build(BuildContext context) {
     return Row(
       children: [
-        Container(width: 10, height: 10, decoration: BoxDecoration(color: color, shape: BoxShape.circle)),
+        Container(
+            width: 10,
+            height: 10,
+            decoration: BoxDecoration(color: color, shape: BoxShape.circle)),
         const SizedBox(width: 6),
-        Text(label, style: const TextStyle(fontSize: 12.5, fontWeight: FontWeight.w600)),
+        Text(label,
+            style:
+                const TextStyle(fontSize: 12.5, fontWeight: FontWeight.w600)),
       ],
     );
   }
@@ -244,7 +285,8 @@ class _MonthlyChart extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final maxVal = breakdown.fold<double>(0, (m, b) => [m, b.income, b.expenses].reduce((a, c) => a > c ? a : c));
+    final maxVal = breakdown.fold<double>(
+        0, (m, b) => [m, b.income, b.expenses].reduce((a, c) => a > c ? a : c));
     final safeMax = maxVal <= 0 ? 1.0 : maxVal;
 
     return BarChart(
@@ -254,21 +296,29 @@ class _MonthlyChart extends StatelessWidget {
           drawVerticalLine: false,
           horizontalInterval: safeMax / 3,
           getDrawingHorizontalLine: (v) => FlLine(
-            color: Theme.of(context).brightness == Brightness.dark ? const Color(0xFF262C38) : const Color(0xFFF0F2F7),
+            color: Theme.of(context).brightness == Brightness.dark
+                ? const Color(0xFF262C38)
+                : const Color(0xFFF0F2F7),
             strokeWidth: 1,
           ),
         ),
         borderData: FlBorderData(show: false),
         titlesData: FlTitlesData(
-          topTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
-          rightTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+          topTitles:
+              const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+          rightTitles:
+              const AxisTitles(sideTitles: SideTitles(showTitles: false)),
           leftTitles: AxisTitles(
             sideTitles: SideTitles(
               showTitles: true,
               reservedSize: 40,
               getTitlesWidget: (value, meta) => Text(
-                value >= 1000 ? '${(value / 1000).toStringAsFixed(0)}k' : value.toStringAsFixed(0),
-                style: TextStyle(fontSize: 9.5, color: Theme.of(context).textTheme.bodySmall!.color),
+                value >= 1000
+                    ? '${(value / 1000).toStringAsFixed(0)}k'
+                    : value.toStringAsFixed(0),
+                style: TextStyle(
+                    fontSize: 9.5,
+                    color: Theme.of(context).textTheme.bodySmall!.color),
               ),
             ),
           ),
@@ -280,7 +330,10 @@ class _MonthlyChart extends StatelessWidget {
                 if (i < 0 || i >= breakdown.length) return const SizedBox();
                 return Padding(
                   padding: const EdgeInsets.only(top: 6),
-                  child: Text(breakdown[i].label.split(' ').first, style: TextStyle(fontSize: 9.5, color: Theme.of(context).textTheme.bodySmall!.color)),
+                  child: Text(breakdown[i].label.split(' ').first,
+                      style: TextStyle(
+                          fontSize: 9.5,
+                          color: Theme.of(context).textTheme.bodySmall!.color)),
                 );
               },
             ),
@@ -289,24 +342,44 @@ class _MonthlyChart extends StatelessWidget {
         maxY: safeMax * 1.1,
         barTouchData: BarTouchData(
           touchTooltipData: BarTouchTooltipData(
-            getTooltipColor: (_) => Theme.of(context).brightness == Brightness.dark ? AppColors.surfaceDark2 : Colors.white,
+            getTooltipColor: (_) =>
+                Theme.of(context).brightness == Brightness.dark
+                    ? AppColors.surfaceDark2
+                    : Colors.white,
             getTooltipItem: (group, groupIndex, rod, rodIndex) {
               final b = breakdown[group.x];
               return BarTooltipItem(
                 '${b.label}\n${rodIndex == 0 ? 'Income' : 'Expense'}: ${formatMoney(rod.toY, currency)}',
-                TextStyle(color: Theme.of(context).brightness == Brightness.dark ? Colors.white : Colors.black, fontSize: 11, fontWeight: FontWeight.w600),
+                TextStyle(
+                    color: Theme.of(context).brightness == Brightness.dark
+                        ? Colors.white
+                        : Colors.black,
+                    fontSize: 11,
+                    fontWeight: FontWeight.w600),
               );
             },
           ),
         ),
-        barGroups: List.generate(breakdown.length, (i) => BarChartGroupData(
-              x: i,
-              barsSpace: 2,
-              barRods: [
-                BarChartRodData(toY: breakdown[i].income, color: AppColors.income, width: 5, borderRadius: const BorderRadius.all(Radius.circular(2))),
-                BarChartRodData(toY: breakdown[i].expenses, color: AppColors.expense, width: 5, borderRadius: const BorderRadius.all(Radius.circular(2))),
-              ],
-            )),
+        barGroups: List.generate(
+            breakdown.length,
+            (i) => BarChartGroupData(
+                  x: i,
+                  barsSpace: 2,
+                  barRods: [
+                    BarChartRodData(
+                        toY: breakdown[i].income,
+                        color: AppColors.income,
+                        width: 5,
+                        borderRadius:
+                            const BorderRadius.all(Radius.circular(2))),
+                    BarChartRodData(
+                        toY: breakdown[i].expenses,
+                        color: AppColors.expense,
+                        width: 5,
+                        borderRadius:
+                            const BorderRadius.all(Radius.circular(2))),
+                  ],
+                )),
       ),
     );
   }

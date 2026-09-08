@@ -49,13 +49,15 @@ class _InsightsScreenState extends State<InsightsScreen> {
             }
             final insights = snapshot.data!;
             final currency = context.watch<AppState>().currencyCode;
-            final noData = insights.currentMonthTotal == 0 && insights.lastMonthTotal == 0;
+            final noData =
+                insights.currentMonthTotal == 0 && insights.lastMonthTotal == 0;
 
             if (noData && insights.monthlyTrend.every((t) => t.total == 0)) {
               return EmptyState(
                 icon: Icons.insights_outlined,
                 title: 'No insights yet',
-                message: 'Add some transactions and come back for smart analysis of your spending.',
+                message:
+                    'Add some transactions and come back for smart analysis of your spending.',
               );
             }
 
@@ -69,7 +71,8 @@ class _InsightsScreenState extends State<InsightsScreen> {
                     Expanded(
                       child: StatTile(
                         label: 'This month',
-                        value: MoneyText(insights.currentMonthTotal, currency, fontSize: 15, color: AppColors.expense),
+                        value: MoneyText(insights.currentMonthTotal, currency,
+                            fontSize: 15, color: AppColors.expense),
                         icon: Icons.calendar_month,
                       ),
                     ),
@@ -77,7 +80,8 @@ class _InsightsScreenState extends State<InsightsScreen> {
                     Expanded(
                       child: StatTile(
                         label: 'Last month',
-                        value: MoneyText(insights.lastMonthTotal, currency, fontSize: 15),
+                        value: MoneyText(insights.lastMonthTotal, currency,
+                            fontSize: 15),
                         icon: Icons.calendar_today_outlined,
                       ),
                     ),
@@ -91,7 +95,8 @@ class _InsightsScreenState extends State<InsightsScreen> {
                   const SizedBox(height: 10),
                   StatTile(
                     label: 'Avg. monthly spending (3 mo)',
-                    value: MoneyText(insights.averageLast3Months, currency, fontSize: 15),
+                    value: MoneyText(insights.averageLast3Months, currency,
+                        fontSize: 15),
                     icon: Icons.stacked_line_chart,
                   ),
                 ],
@@ -112,12 +117,17 @@ class _InsightsScreenState extends State<InsightsScreen> {
                                 Container(
                                   width: 10,
                                   height: 10,
-                                  decoration: BoxDecoration(color: AppColors.colorFromHex(r.color), shape: BoxShape.circle),
+                                  decoration: BoxDecoration(
+                                      color: AppColors.colorFromHex(r.color),
+                                      shape: BoxShape.circle),
                                 ),
                                 const SizedBox(width: 8),
                                 SizedBox(
                                   width: 100,
-                                  child: Text(r.category, style: const TextStyle(fontSize: 12.5), maxLines: 1, overflow: TextOverflow.ellipsis),
+                                  child: Text(r.category,
+                                      style: const TextStyle(fontSize: 12.5),
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis),
                                 ),
                                 Expanded(
                                   child: SizedBox(
@@ -125,20 +135,40 @@ class _InsightsScreenState extends State<InsightsScreen> {
                                     child: ClipRRect(
                                       borderRadius: BorderRadius.circular(6),
                                       child: LinearProgressIndicator(
-                                        value: (r.percentage / 100).clamp(0.0, 1.0),
-                                        backgroundColor: Theme.of(context).brightness == Brightness.dark ? AppColors.surfaceDark2 : const Color(0xFFE9EBF2),
-                                        valueColor: AlwaysStoppedAnimation(AppColors.colorFromHex(r.color)),
+                                        value: (r.percentage / 100)
+                                            .clamp(0.0, 1.0),
+                                        backgroundColor:
+                                            Theme.of(context).brightness ==
+                                                    Brightness.dark
+                                                ? AppColors.surfaceDark2
+                                                : const Color(0xFFE9EBF2),
+                                        valueColor: AlwaysStoppedAnimation(
+                                            AppColors.colorFromHex(r.color)),
                                       ),
                                     ),
                                   ),
                                 ),
                                 const SizedBox(width: 8),
                                 Flexible(
-                                  child: Text(formatMoney(r.total, currency), textAlign: TextAlign.right, style: const TextStyle(fontSize: 12.5, fontWeight: FontWeight.w700), maxLines: 1, overflow: TextOverflow.ellipsis),
+                                  child: Text(formatMoney(r.total, currency),
+                                      textAlign: TextAlign.right,
+                                      style: const TextStyle(
+                                          fontSize: 12.5,
+                                          fontWeight: FontWeight.w700),
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis),
                                 ),
                                 SizedBox(
                                   width: 34,
-                                  child: Text('${r.percentage.toStringAsFixed(0)}%', textAlign: TextAlign.right, style: TextStyle(fontSize: 12, color: Theme.of(context).textTheme.bodySmall!.color)),
+                                  child: Text(
+                                      '${r.percentage.toStringAsFixed(0)}%',
+                                      textAlign: TextAlign.right,
+                                      style: TextStyle(
+                                          fontSize: 12,
+                                          color: Theme.of(context)
+                                              .textTheme
+                                              .bodySmall!
+                                              .color)),
                                 ),
                               ],
                             ),
@@ -148,17 +178,20 @@ class _InsightsScreenState extends State<InsightsScreen> {
                   ),
                 ],
                 if (insights.monthlyTrend.isNotEmpty) ...[
-                  SectionTitle('12-month trend', padding: const EdgeInsets.fromLTRB(0, 20, 0, 10)),
+                  SectionTitle('12-month trend',
+                      padding: const EdgeInsets.fromLTRB(0, 20, 0, 10)),
                   AppCard(
                     padding: const EdgeInsets.all(16),
                     child: SizedBox(
                       height: 180,
-                      child: _TrendChart(insights: insights, currency: currency),
+                      child:
+                          _TrendChart(insights: insights, currency: currency),
                     ),
                   ),
                 ],
                 if (insights.forecast != null) ...[
-                  SectionTitle('Spending forecast', padding: const EdgeInsets.fromLTRB(0, 20, 0, 10)),
+                  SectionTitle('Spending forecast',
+                      padding: const EdgeInsets.fromLTRB(0, 20, 0, 10)),
                   AppCard(
                     padding: const EdgeInsets.all(16),
                     child: Column(
@@ -186,7 +219,9 @@ class _InsightsScreenState extends State<InsightsScreen> {
                                     : insights.forecast!.trend == 'decreasing'
                                         ? 'Spending is projected to decrease'
                                         : 'Spending is projected to stay steady',
-                                style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 13.5),
+                                style: const TextStyle(
+                                    fontWeight: FontWeight.w600,
+                                    fontSize: 13.5),
                               ),
                             ),
                           ],
@@ -194,25 +229,32 @@ class _InsightsScreenState extends State<InsightsScreen> {
                         const SizedBox(height: 14),
                         SizedBox(
                           height: 130,
-                          child: _ForecastChart(insights: insights, currency: currency),
+                          child: _ForecastChart(
+                              insights: insights, currency: currency),
                         ),
                       ],
                     ),
                   ),
                 ],
                 if (insights.dayOfWeekAnalysis.any((d) => d.total > 0)) ...[
-                  SectionTitle('Spending by day of week', padding: const EdgeInsets.fromLTRB(0, 20, 0, 10)),
+                  SectionTitle('Spending by day of week',
+                      padding: const EdgeInsets.fromLTRB(0, 20, 0, 10)),
                   AppCard(
                     padding: const EdgeInsets.all(16),
-                    child: _DayOfWeekBar(rows: insights.dayOfWeekAnalysis, currency: currency),
+                    child: _DayOfWeekBar(
+                        rows: insights.dayOfWeekAnalysis, currency: currency),
                   ),
                 ],
                 if (insights.anomalies.isNotEmpty) ...[
-                  SectionTitle('Unusual spending', padding: const EdgeInsets.fromLTRB(0, 20, 0, 10)),
-                  ...insights.anomalies.take(6).map((a) => _AnomalyCard(anomaly: a, currency: currency)),
+                  SectionTitle('Unusual spending',
+                      padding: const EdgeInsets.fromLTRB(0, 20, 0, 10)),
+                  ...insights.anomalies
+                      .take(6)
+                      .map((a) => _AnomalyCard(anomaly: a, currency: currency)),
                 ],
                 if (insights.topCategories.isNotEmpty) ...[
-                  SectionTitle('Top categories (3 months)', padding: const EdgeInsets.fromLTRB(0, 20, 0, 10)),
+                  SectionTitle('Top categories (3 months)',
+                      padding: const EdgeInsets.fromLTRB(0, 20, 0, 10)),
                   AppCard(
                     padding: const EdgeInsets.all(16),
                     child: Column(
@@ -222,12 +264,19 @@ class _InsightsScreenState extends State<InsightsScreen> {
                             padding: const EdgeInsets.symmetric(vertical: 6),
                             child: Row(
                               children: [
-                                CategoryAvatar(name: r.category, color: r.color, size: 30),
+                                CategoryAvatar(
+                                    name: r.category, color: r.color, size: 30),
                                 const SizedBox(width: 10),
                                 Expanded(
-                                  child: Text(r.category, style: const TextStyle(fontSize: 13.5, fontWeight: FontWeight.w600)),
+                                  child: Text(r.category,
+                                      style: const TextStyle(
+                                          fontSize: 13.5,
+                                          fontWeight: FontWeight.w600)),
                                 ),
-                                Text(formatMoney(r.total, currency), style: const TextStyle(fontSize: 13.5, fontWeight: FontWeight.w700)),
+                                Text(formatMoney(r.total, currency),
+                                    style: const TextStyle(
+                                        fontSize: 13.5,
+                                        fontWeight: FontWeight.w700)),
                               ],
                             ),
                           ),
@@ -252,15 +301,17 @@ class _ScoreCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final score = insights.spendingScore;
-    final color = score >= 80 ? Colors.green : score >= 60 ? AppColors.secondary : score >= 40 ? AppColors.warning : AppColors.danger;
+    final color = score >= 80
+        ? AppColors.income
+        : score >= 60
+            ? AppColors.secondary
+            : score >= 40
+                ? AppColors.warning
+                : AppColors.danger;
     final label = insights.scoreRating.toUpperCase();
 
-    return Container(
+    return BrandHeroCard(
       padding: const EdgeInsets.all(18),
-      decoration: BoxDecoration(
-        gradient: const LinearGradient(colors: AppColors.brandGradient),
-        borderRadius: BorderRadius.circular(22),
-      ),
       child: Row(
         children: [
           Stack(
@@ -273,13 +324,19 @@ class _ScoreCard extends StatelessWidget {
                   value: score / 100,
                   strokeWidth: 8,
                   backgroundColor: Colors.white.withValues(alpha: 0.2),
-                  valueColor: const AlwaysStoppedAnimation(Colors.white),
+                  valueColor: const AlwaysStoppedAnimation(AppColors.onHero),
                 ),
               ),
               Column(
                 children: [
-                  Text('$score', style: const TextStyle(color: Colors.white, fontSize: 26, fontWeight: FontWeight.w800)),
-                  Text('/ 100', style: TextStyle(color: Colors.white.withValues(alpha: 0.7), fontSize: 11)),
+                  Text('$score',
+                      style: const TextStyle(
+                          color: AppColors.onHero,
+                          fontSize: 26,
+                          fontWeight: FontWeight.w800)),
+                  Text('/ 100',
+                      style: const TextStyle(
+                          color: AppColors.onHeroMuted, fontSize: 11)),
                 ],
               ),
             ],
@@ -289,17 +346,31 @@ class _ScoreCard extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text('Spending Score', style: TextStyle(color: Colors.white.withValues(alpha: 0.8), fontSize: 13)),
+                Text('Spending Score',
+                    style: const TextStyle(
+                        color: AppColors.onHeroMuted, fontSize: 13)),
                 const SizedBox(height: 4),
-                Text(label, style: const TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.w800)),
+                Text(label,
+                    style: const TextStyle(
+                        color: AppColors.onHero,
+                        fontSize: 20,
+                        fontWeight: FontWeight.w800)),
                 const SizedBox(height: 8),
                 Row(
                   children: [
-                    Container(width: 10, height: 10, decoration: BoxDecoration(color: color, shape: BoxShape.circle)),
+                    Container(
+                        width: 10,
+                        height: 10,
+                        decoration: BoxDecoration(
+                            color: color, shape: BoxShape.circle)),
                     const SizedBox(width: 6),
                     Flexible(
-                      child: Text('${insights.currentMonthTotal.toStringAsFixed(2)} spent this month',
-                          style: TextStyle(color: Colors.white.withValues(alpha: 0.85), fontSize: 12.5), maxLines: 1, overflow: TextOverflow.ellipsis),
+                      child: Text(
+                          '${insights.currentMonthTotal.toStringAsFixed(2)} spent this month',
+                          style: const TextStyle(
+                              color: AppColors.onHeroMuted, fontSize: 12.5),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis),
                     ),
                   ],
                 ),
@@ -329,13 +400,17 @@ class _ChangeCard extends StatelessWidget {
           const SizedBox(width: 10),
           Expanded(
             child: Text(
-              up ? 'Spending increased vs last month' : 'Spending decreased vs last month',
-              style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 13.5),
+              up
+                  ? 'Spending increased vs last month'
+                  : 'Spending decreased vs last month',
+              style:
+                  const TextStyle(fontWeight: FontWeight.w600, fontSize: 13.5),
             ),
           ),
           Text(
             '${up ? '+' : ''}${insights.changePercent.toStringAsFixed(1)}%',
-            style: TextStyle(fontWeight: FontWeight.w800, fontSize: 16, color: color),
+            style: TextStyle(
+                fontWeight: FontWeight.w800, fontSize: 16, color: color),
           ),
         ],
       ),
@@ -361,21 +436,29 @@ class _TrendChart extends StatelessWidget {
           drawVerticalLine: false,
           horizontalInterval: safeMax / 3,
           getDrawingHorizontalLine: (v) => FlLine(
-            color: Theme.of(context).brightness == Brightness.dark ? const Color(0xFF262C38) : const Color(0xFFF0F2F7),
+            color: Theme.of(context).brightness == Brightness.dark
+                ? const Color(0xFF262C38)
+                : const Color(0xFFF0F2F7),
             strokeWidth: 1,
           ),
         ),
         borderData: FlBorderData(show: false),
         titlesData: FlTitlesData(
-          topTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
-          rightTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+          topTitles:
+              const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+          rightTitles:
+              const AxisTitles(sideTitles: SideTitles(showTitles: false)),
           leftTitles: AxisTitles(
             sideTitles: SideTitles(
               showTitles: true,
               reservedSize: 40,
               getTitlesWidget: (value, meta) => Text(
-                value >= 1000 ? '${(value / 1000).toStringAsFixed(0)}k' : value.toStringAsFixed(0),
-                style: TextStyle(fontSize: 9.5, color: Theme.of(context).textTheme.bodySmall!.color),
+                value >= 1000
+                    ? '${(value / 1000).toStringAsFixed(0)}k'
+                    : value.toStringAsFixed(0),
+                style: TextStyle(
+                    fontSize: 9.5,
+                    color: Theme.of(context).textTheme.bodySmall!.color),
               ),
             ),
           ),
@@ -388,7 +471,10 @@ class _TrendChart extends StatelessWidget {
                 if (i < 0 || i >= rows.length) return const SizedBox();
                 return Padding(
                   padding: const EdgeInsets.only(top: 6),
-                  child: Text(rows[i].label, style: TextStyle(fontSize: 10, color: Theme.of(context).textTheme.bodySmall!.color)),
+                  child: Text(rows[i].label,
+                      style: TextStyle(
+                          fontSize: 10,
+                          color: Theme.of(context).textTheme.bodySmall!.color)),
                 );
               },
             ),
@@ -398,12 +484,20 @@ class _TrendChart extends StatelessWidget {
         maxY: safeMax * 1.15,
         lineTouchData: LineTouchData(
           touchTooltipData: LineTouchTooltipData(
-            getTooltipColor: (_) => Theme.of(context).brightness == Brightness.dark ? AppColors.surfaceDark2 : Colors.white,
+            getTooltipColor: (_) =>
+                Theme.of(context).brightness == Brightness.dark
+                    ? AppColors.surfaceDark2
+                    : Colors.white,
             getTooltipItems: (spots) => spots.map((s) {
               final row = rows[s.x.toInt()];
               return LineTooltipItem(
                 '${row.label}\n${formatMoney(row.total, currency)}',
-                TextStyle(fontWeight: FontWeight.w700, color: Theme.of(context).brightness == Brightness.dark ? Colors.white : Colors.black, fontSize: 12),
+                TextStyle(
+                    fontWeight: FontWeight.w700,
+                    color: Theme.of(context).brightness == Brightness.dark
+                        ? Colors.white
+                        : Colors.black,
+                    fontSize: 12),
               );
             }).toList(),
           ),
@@ -411,7 +505,8 @@ class _TrendChart extends StatelessWidget {
         lineBarsData: [
           LineChartBarData(
             spots: [
-              for (var i = 0; i < rows.length; i++) FlSpot(i.toDouble(), rows[i].total),
+              for (var i = 0; i < rows.length; i++)
+                FlSpot(i.toDouble(), rows[i].total),
             ],
             isCurved: true,
             color: AppColors.primary,
@@ -442,9 +537,12 @@ class _ForecastChart extends StatelessWidget {
     final maxVal = allVals.fold<double>(0, (m, v) => v > m ? v : m);
     final safeMax = maxVal <= 0 ? 1.0 : maxVal;
 
-    final historySpots = [for (var i = 0; i < history.length; i++) FlSpot(i.toDouble(), history[i])];
+    final historySpots = [
+      for (var i = 0; i < history.length; i++) FlSpot(i.toDouble(), history[i])
+    ];
     final futureSpots = [
-      for (var i = 0; i < future.length; i++) FlSpot((history.length - 1 + i).toDouble(), future[i]),
+      for (var i = 0; i < future.length; i++)
+        FlSpot((history.length - 1 + i).toDouble(), future[i]),
     ];
 
     return LineChart(
@@ -454,21 +552,29 @@ class _ForecastChart extends StatelessWidget {
           drawVerticalLine: false,
           horizontalInterval: safeMax / 3,
           getDrawingHorizontalLine: (v) => FlLine(
-            color: Theme.of(context).brightness == Brightness.dark ? const Color(0xFF262C38) : const Color(0xFFF0F2F7),
+            color: Theme.of(context).brightness == Brightness.dark
+                ? const Color(0xFF262C38)
+                : const Color(0xFFF0F2F7),
             strokeWidth: 1,
           ),
         ),
         borderData: FlBorderData(show: false),
         titlesData: FlTitlesData(
-          topTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
-          rightTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+          topTitles:
+              const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+          rightTitles:
+              const AxisTitles(sideTitles: SideTitles(showTitles: false)),
           leftTitles: AxisTitles(
             sideTitles: SideTitles(
               showTitles: true,
               reservedSize: 36,
               getTitlesWidget: (value, meta) => Text(
-                value >= 1000 ? '${(value / 1000).toStringAsFixed(0)}k' : value.toStringAsFixed(0),
-                style: TextStyle(fontSize: 9, color: Theme.of(context).textTheme.bodySmall!.color),
+                value >= 1000
+                    ? '${(value / 1000).toStringAsFixed(0)}k'
+                    : value.toStringAsFixed(0),
+                style: TextStyle(
+                    fontSize: 9,
+                    color: Theme.of(context).textTheme.bodySmall!.color),
               ),
             ),
           ),
@@ -482,14 +588,20 @@ class _ForecastChart extends StatelessWidget {
                 if (i < history.length) {
                   return Padding(
                     padding: const EdgeInsets.only(top: 6),
-                    child: Text(forecast.historyLabels[i], style: TextStyle(fontSize: 9, color: Theme.of(context).textTheme.bodySmall!.color)),
+                    child: Text(forecast.historyLabels[i],
+                        style: TextStyle(
+                            fontSize: 9,
+                            color:
+                                Theme.of(context).textTheme.bodySmall!.color)),
                   );
                 }
                 final idx = i - history.length + 1;
                 if (idx >= 0 && idx < forecast.labels.length) {
                   return Padding(
                     padding: const EdgeInsets.only(top: 6),
-                    child: Text(forecast.labels[idx], style: TextStyle(fontSize: 9, color: AppColors.secondary)),
+                    child: Text(forecast.labels[idx],
+                        style:
+                            TextStyle(fontSize: 9, color: AppColors.secondary)),
                   );
                 }
                 return const SizedBox();
@@ -501,7 +613,10 @@ class _ForecastChart extends StatelessWidget {
         maxY: safeMax * 1.15,
         lineTouchData: LineTouchData(
           touchTooltipData: LineTouchTooltipData(
-            getTooltipColor: (_) => Theme.of(context).brightness == Brightness.dark ? AppColors.surfaceDark2 : Colors.white,
+            getTooltipColor: (_) =>
+                Theme.of(context).brightness == Brightness.dark
+                    ? AppColors.surfaceDark2
+                    : Colors.white,
             getTooltipItems: (spots) => spots.map((s) {
               final x = s.x.toInt();
               String label;
@@ -512,7 +627,12 @@ class _ForecastChart extends StatelessWidget {
               }
               return LineTooltipItem(
                 '$label\n${formatMoney(s.y, currency)}',
-                TextStyle(fontWeight: FontWeight.w700, color: Theme.of(context).brightness == Brightness.dark ? Colors.white : Colors.black, fontSize: 12),
+                TextStyle(
+                    fontWeight: FontWeight.w700,
+                    color: Theme.of(context).brightness == Brightness.dark
+                        ? Colors.white
+                        : Colors.black,
+                    fontSize: 12),
               );
             }).toList(),
           ),
@@ -531,11 +651,13 @@ class _ForecastChart extends StatelessWidget {
             isCurved: true,
             color: AppColors.secondary,
             barWidth: 2.5,
-            dotData: FlDotData(show: true, getDotPainter: (s, p, rod, index) => FlDotCirclePainter(
-                  radius: 3,
-                  color: AppColors.secondary,
-                  strokeWidth: 0,
-                )),
+            dotData: FlDotData(
+                show: true,
+                getDotPainter: (s, p, rod, index) => FlDotCirclePainter(
+                      radius: 3,
+                      color: AppColors.secondary,
+                      strokeWidth: 0,
+                    )),
             belowBarData: BarAreaData(
               show: true,
               color: AppColors.secondary.withValues(alpha: 0.1),
@@ -565,7 +687,10 @@ class _DayOfWeekBar extends StatelessWidget {
               children: [
                 SizedBox(
                   width: 74,
-                  child: Text(r.day, style: const TextStyle(fontSize: 12), maxLines: 1, overflow: TextOverflow.ellipsis),
+                  child: Text(r.day,
+                      style: const TextStyle(fontSize: 12),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis),
                 ),
                 Expanded(
                   child: SizedBox(
@@ -574,8 +699,14 @@ class _DayOfWeekBar extends StatelessWidget {
                       borderRadius: BorderRadius.circular(8),
                       child: LinearProgressIndicator(
                         value: (r.total / safeMax).clamp(0.0, 1.0),
-                        backgroundColor: Theme.of(context).brightness == Brightness.dark ? AppColors.surfaceDark2 : const Color(0xFFE9EBF2),
-                        valueColor: AlwaysStoppedAnimation(r.day == 'Sunday' || r.day == 'Saturday' ? AppColors.warning : AppColors.primary),
+                        backgroundColor:
+                            Theme.of(context).brightness == Brightness.dark
+                                ? AppColors.surfaceDark2
+                                : const Color(0xFFE9EBF2),
+                        valueColor: AlwaysStoppedAnimation(
+                            r.day == 'Sunday' || r.day == 'Saturday'
+                                ? AppColors.warning
+                                : AppColors.primary),
                       ),
                     ),
                   ),
@@ -583,7 +714,10 @@ class _DayOfWeekBar extends StatelessWidget {
                 const SizedBox(width: 10),
                 SizedBox(
                   width: 80,
-                  child: Text(formatMoney(r.total, currency), textAlign: TextAlign.right, style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w700)),
+                  child: Text(formatMoney(r.total, currency),
+                      textAlign: TextAlign.right,
+                      style: const TextStyle(
+                          fontSize: 12, fontWeight: FontWeight.w700)),
                 ),
               ],
             ),
@@ -608,10 +742,15 @@ class _AnomalyCard extends StatelessWidget {
         children: [
           Row(
             children: [
-              const Icon(Icons.warning_amber_rounded, color: AppColors.warning, size: 20),
+              const Icon(Icons.warning_amber_rounded,
+                  color: AppColors.warning, size: 20),
               const SizedBox(width: 8),
               Expanded(
-                child: Text(anomaly.description, style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 13.5), maxLines: 2, overflow: TextOverflow.ellipsis),
+                child: Text(anomaly.description,
+                    style: const TextStyle(
+                        fontWeight: FontWeight.w700, fontSize: 13.5),
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis),
               ),
             ],
           ),
@@ -619,12 +758,26 @@ class _AnomalyCard extends StatelessWidget {
           Row(
             children: [
               Flexible(
-                child: Text('${anomaly.category} · ', style: TextStyle(fontSize: 12, color: Theme.of(context).textTheme.bodySmall!.color), maxLines: 1, overflow: TextOverflow.ellipsis),
+                child: Text('${anomaly.category} · ',
+                    style: TextStyle(
+                        fontSize: 12,
+                        color: Theme.of(context).textTheme.bodySmall!.color),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis),
               ),
-              Text(formatMoney(anomaly.amount, currency), style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: AppColors.danger)),
+              Text(formatMoney(anomaly.amount, currency),
+                  style: const TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w700,
+                      color: AppColors.danger)),
               Flexible(
-                child: Text(' vs avg ${formatMoney(anomaly.average, currency)} (${anomaly.ratio.toStringAsFixed(1)}x)',
-                    style: TextStyle(fontSize: 12, color: Theme.of(context).textTheme.bodySmall!.color), maxLines: 1, overflow: TextOverflow.ellipsis),
+                child: Text(
+                    ' vs avg ${formatMoney(anomaly.average, currency)} (${anomaly.ratio.toStringAsFixed(1)}x)',
+                    style: TextStyle(
+                        fontSize: 12,
+                        color: Theme.of(context).textTheme.bodySmall!.color),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis),
               ),
             ],
           ),

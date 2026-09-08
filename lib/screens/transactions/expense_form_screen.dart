@@ -89,7 +89,8 @@ class _ExpenseFormScreenState extends State<ExpenseFormScreen> {
       if (widget.initialPaymentMethod != null) {
         _paymentMethod = widget.initialPaymentMethod!;
       }
-      if (widget.initialNotes != null && widget.initialNotes!.trim().isNotEmpty) {
+      if (widget.initialNotes != null &&
+          widget.initialNotes!.trim().isNotEmpty) {
         _notesController.text = widget.initialNotes!;
       }
       if (widget.initialReceiptPath != null) {
@@ -132,14 +133,17 @@ class _ExpenseFormScreenState extends State<ExpenseFormScreen> {
 
   Future<void> _pickReceipt() async {
     final picker = ImagePicker();
-    final file = await picker.pickImage(source: ImageSource.gallery, maxWidth: 1600, imageQuality: 80);
+    final file = await picker.pickImage(
+        source: ImageSource.gallery, maxWidth: 1600, imageQuality: 80);
     if (file == null) return;
     String? copiedPath;
     try {
       final dir = await getApplicationDocumentsDirectory();
       final receiptsDir = Directory(p.join(dir.path, 'receipts'));
-      if (!await receiptsDir.exists()) await receiptsDir.create(recursive: true);
-      final dest = p.join(receiptsDir.path, '${DateTime.now().millisecondsSinceEpoch}_${p.basename(file.path)}');
+      if (!await receiptsDir.exists())
+        await receiptsDir.create(recursive: true);
+      final dest = p.join(receiptsDir.path,
+          '${DateTime.now().millisecondsSinceEpoch}_${p.basename(file.path)}');
       await File(file.path).copy(dest);
       copiedPath = dest;
     } catch (_) {
@@ -180,9 +184,11 @@ class _ExpenseFormScreenState extends State<ExpenseFormScreen> {
           context: context,
           builder: (ctx) => AlertDialog(
             title: const Text('Budget exceeded'),
-            content: Text('You have exceeded your budget for ${result.exceededBudget?.categoryName ?? 'this category'}.'),
+            content: Text(
+                'You have exceeded your budget for ${result.exceededBudget?.categoryName ?? 'this category'}.'),
             actions: [
-              TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('OK')),
+              TextButton(
+                  onPressed: () => Navigator.pop(ctx), child: const Text('OK')),
             ],
           ),
         );
@@ -200,9 +206,12 @@ class _ExpenseFormScreenState extends State<ExpenseFormScreen> {
         context: context,
         builder: (ctx) => AlertDialog(
           title: const Text('Duplicate expense'),
-          content: Text('${e.message}\n\nTap "Save anyway" to confirm this duplicate.'),
+          content: Text(
+              '${e.message}\n\nTap "Save anyway" to confirm this duplicate.'),
           actions: [
-            TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Cancel')),
+            TextButton(
+                onPressed: () => Navigator.pop(ctx, false),
+                child: const Text('Cancel')),
             FilledButton(
               onPressed: () => Navigator.pop(ctx, true),
               child: const Text('Save anyway'),
@@ -234,7 +243,8 @@ class _ExpenseFormScreenState extends State<ExpenseFormScreen> {
     } catch (e) {
       if (!mounted) return;
       setState(() => _saving = false);
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Could not save: $e')));
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text('Could not save: $e')));
     }
   }
 
@@ -287,10 +297,15 @@ class _ExpenseFormScreenState extends State<ExpenseFormScreen> {
                 builder: (_) => RecurringFormScreen(
                   initialCategoryId: _categoryId,
                   initialBillCategoryId: _billCategoryId,
-                  initialDescription: _descriptionController.text.trim().isEmpty ? null : _descriptionController.text.trim(),
-                  initialAmount: double.tryParse(_amountController.text.replaceAll(',', '')),
+                  initialDescription: _descriptionController.text.trim().isEmpty
+                      ? null
+                      : _descriptionController.text.trim(),
+                  initialAmount: double.tryParse(
+                      _amountController.text.replaceAll(',', '')),
                   initialPaymentMethod: _paymentMethod,
-                  initialNotes: _notesController.text.trim().isEmpty ? null : _notesController.text.trim(),
+                  initialNotes: _notesController.text.trim().isEmpty
+                      ? null
+                      : _notesController.text.trim(),
                   initialDayOfMonth: _date.day,
                 ),
               ));
@@ -324,19 +339,24 @@ class _ExpenseFormScreenState extends State<ExpenseFormScreen> {
               }),
             ),
             const SizedBox(height: 18),
-            Text('Bill type (optional)', style: Theme.of(context).textTheme.titleMedium),
+            Text('Bill type (optional)',
+                style: Theme.of(context).textTheme.titleMedium),
             const SizedBox(height: 10),
             DropdownButtonFormField<int?>(
               value: _billCategoryId,
-              decoration: const InputDecoration(prefixIcon: Icon(Icons.receipt_long_outlined)),
+              decoration: const InputDecoration(
+                  prefixIcon: Icon(Icons.receipt_long_outlined)),
               items: [
-                const DropdownMenuItem<int?>(value: null, child: Text('Not a bill')),
-                ..._billCategories.map((b) => DropdownMenuItem<int?>(value: b.id, child: Text(b.name))),
+                const DropdownMenuItem<int?>(
+                    value: null, child: Text('Not a bill')),
+                ..._billCategories.map((b) =>
+                    DropdownMenuItem<int?>(value: b.id, child: Text(b.name))),
               ],
               onChanged: (v) => setState(() => _billCategoryId = v),
             ),
             const SizedBox(height: 14),
-            Text('Date & Payment', style: Theme.of(context).textTheme.titleMedium),
+            Text('Date & Payment',
+                style: Theme.of(context).textTheme.titleMedium),
             const SizedBox(height: 10),
             Row(
               children: [
@@ -345,7 +365,8 @@ class _ExpenseFormScreenState extends State<ExpenseFormScreen> {
                     onTap: _pickDate,
                     borderRadius: BorderRadius.circular(14),
                     child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 15),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 16, vertical: 15),
                       decoration: BoxDecoration(
                         color: Theme.of(context).brightness == Brightness.dark
                             ? AppColors.surfaceDark2
@@ -354,9 +375,14 @@ class _ExpenseFormScreenState extends State<ExpenseFormScreen> {
                       ),
                       child: Row(
                         children: [
-                          Icon(Icons.calendar_today_outlined, size: 20, color: Theme.of(context).textTheme.bodySmall!.color),
+                          Icon(Icons.calendar_today_outlined,
+                              size: 20,
+                              color:
+                                  Theme.of(context).textTheme.bodySmall!.color),
                           const SizedBox(width: 10),
-                          Text(formatDateShort(_dateStr()), style: const TextStyle(fontWeight: FontWeight.w500)),
+                          Text(formatDateShort(_dateStr()),
+                              style:
+                                  const TextStyle(fontWeight: FontWeight.w500)),
                         ],
                       ),
                     ),
@@ -366,7 +392,8 @@ class _ExpenseFormScreenState extends State<ExpenseFormScreen> {
                 Expanded(
                   child: DropdownButtonFormField<String>(
                     value: _paymentMethod,
-                    decoration: const InputDecoration(prefixIcon: Icon(Icons.wallet_outlined)),
+                    decoration: const InputDecoration(
+                        prefixIcon: Icon(Icons.wallet_outlined)),
                     items: AppStrings.expensePaymentMethods
                         .map((m) => DropdownMenuItem<String>(
                               value: m,
@@ -375,13 +402,16 @@ class _ExpenseFormScreenState extends State<ExpenseFormScreen> {
                                   PaymentMethodBadge(code: m, size: 22),
                                   const SizedBox(width: 8),
                                   Flexible(
-                                    child: Text(paymentMethodLabel(m), maxLines: 1, overflow: TextOverflow.ellipsis),
+                                    child: Text(paymentMethodLabel(m),
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis),
                                   ),
                                 ],
                               ),
                             ))
                         .toList(),
-                    onChanged: (v) => setState(() => _paymentMethod = v ?? 'cash'),
+                    onChanged: (v) =>
+                        setState(() => _paymentMethod = v ?? 'cash'),
                   ),
                 ),
               ],
@@ -390,7 +420,9 @@ class _ExpenseFormScreenState extends State<ExpenseFormScreen> {
             TextField(
               controller: _notesController,
               maxLines: 3,
-              decoration: const InputDecoration(hintText: 'Notes (optional)', prefixIcon: Icon(Icons.sticky_note_2_outlined)),
+              decoration: const InputDecoration(
+                  hintText: 'Notes (optional)',
+                  prefixIcon: Icon(Icons.sticky_note_2_outlined)),
             ),
             const SizedBox(height: 14),
             if (_receiptPath == null)
@@ -411,7 +443,9 @@ class _ExpenseFormScreenState extends State<ExpenseFormScreen> {
                     const Icon(Icons.image_outlined, color: AppColors.primary),
                     const SizedBox(width: 10),
                     Expanded(
-                      child: Text(p.basename(_receiptPath!), overflow: TextOverflow.ellipsis, style: const TextStyle(fontSize: 13)),
+                      child: Text(p.basename(_receiptPath!),
+                          overflow: TextOverflow.ellipsis,
+                          style: const TextStyle(fontSize: 13)),
                     ),
                     IconButton(
                       icon: const Icon(Icons.close, size: 18),
@@ -424,7 +458,11 @@ class _ExpenseFormScreenState extends State<ExpenseFormScreen> {
             ElevatedButton(
               onPressed: _saving ? null : _save,
               child: _saving
-                  ? const SizedBox(width: 22, height: 22, child: CircularProgressIndicator(strokeWidth: 2.4, color: Colors.white))
+                  ? const SizedBox(
+                      width: 22,
+                      height: 22,
+                      child: CircularProgressIndicator(
+                          strokeWidth: 2.4, color: Colors.white))
                   : Text(_isEdit ? 'Save Changes' : 'Save Expense'),
             ),
           ],
@@ -451,30 +489,36 @@ class _HeaderCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        gradient: const LinearGradient(colors: AppColors.brandGradient),
-        borderRadius: BorderRadius.circular(22),
-      ),
+    return BrandHeroCard(
+      tone: HeroCardTone.brand,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('Amount', style: TextStyle(color: Colors.white.withValues(alpha: 0.8), fontSize: 13)),
+          Text('Amount',
+              style: TextStyle(color: AppColors.onHeroMuted, fontSize: 13)),
           const SizedBox(height: 6),
           Row(
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
-              Text(currencySymbol(currency), style: const TextStyle(color: Colors.white, fontSize: 22, fontWeight: FontWeight.w800)),
+              Text(currencySymbol(currency),
+                  style: const TextStyle(
+                      color: AppColors.onHero,
+                      fontSize: 22,
+                      fontWeight: FontWeight.w800)),
               const SizedBox(width: 6),
               Expanded(
                 child: TextField(
                   controller: bigField,
-                  keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                  style: const TextStyle(color: Colors.white, fontSize: 32, fontWeight: FontWeight.w800),
-                  decoration: const InputDecoration(
+                  keyboardType:
+                      const TextInputType.numberWithOptions(decimal: true),
+                  style: const TextStyle(
+                      color: AppColors.onHero,
+                      fontSize: 32,
+                      fontWeight: FontWeight.w800),
+                  decoration: InputDecoration(
                     hintText: '0.00',
-                    hintStyle: TextStyle(color: Color(0x88FFFFFF)),
+                    hintStyle: TextStyle(
+                        color: AppColors.onHero.withValues(alpha: 0.55)),
                     border: InputBorder.none,
                     enabledBorder: InputBorder.none,
                     focusedBorder: InputBorder.none,
@@ -488,25 +532,30 @@ class _HeaderCard extends StatelessWidget {
           TextField(
             controller: descriptionController,
             onChanged: onDescriptionChanged,
-            style: const TextStyle(color: Colors.white),
+            style: const TextStyle(color: AppColors.onHero),
             decoration: InputDecoration(
               hintText: hintText,
-              hintStyle: const TextStyle(color: Color(0xAAFFFFFF)),
-              prefixIcon: const Icon(Icons.edit_outlined, color: Colors.white70),
+              hintStyle:
+                  TextStyle(color: AppColors.onHero.withValues(alpha: 0.65)),
+              prefixIcon:
+                  const Icon(Icons.edit_outlined, color: AppColors.onHeroMuted),
               border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(14),
-                borderSide: BorderSide(color: Colors.white.withValues(alpha: 0.3)),
+                borderRadius: BorderRadius.circular(AppTheme.radiusMd),
+                borderSide:
+                    BorderSide(color: AppColors.onHero.withValues(alpha: 0.3)),
               ),
               enabledBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(14),
-                borderSide: BorderSide(color: Colors.white.withValues(alpha: 0.3)),
+                borderRadius: BorderRadius.circular(AppTheme.radiusMd),
+                borderSide:
+                    BorderSide(color: AppColors.onHero.withValues(alpha: 0.3)),
               ),
               focusedBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(14),
-                borderSide: const BorderSide(color: Colors.white, width: 1.6),
+                borderRadius: BorderRadius.circular(AppTheme.radiusMd),
+                borderSide:
+                    const BorderSide(color: AppColors.onHero, width: 1.6),
               ),
               filled: true,
-              fillColor: Colors.white.withValues(alpha: 0.12),
+              fillColor: AppColors.onHero.withValues(alpha: 0.12),
             ),
           ),
         ],
@@ -546,11 +595,18 @@ class _CategorySelector extends StatelessWidget {
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
               decoration: BoxDecoration(
-                color: selectedId == null ? AppColors.primary.withValues(alpha: 0.12) : Theme.of(context).colorScheme.surface,
+                color: selectedId == null
+                    ? AppColors.primary.withValues(alpha: 0.12)
+                    : Theme.of(context).colorScheme.surface,
                 borderRadius: BorderRadius.circular(14),
-                border: Border.all(color: selectedId == null ? AppColors.primary : Colors.transparent),
+                border: Border.all(
+                    color: selectedId == null
+                        ? AppColors.primary
+                        : Colors.transparent),
               ),
-              child: const Text('Auto', style: TextStyle(fontWeight: FontWeight.w600, color: AppColors.primary)),
+              child: const Text('Auto',
+                  style: TextStyle(
+                      fontWeight: FontWeight.w600, color: AppColors.primary)),
             ),
           ),
         for (final c in categories)
@@ -567,18 +623,25 @@ class _CategorySelector extends StatelessWidget {
                 border: Border.all(
                   color: selectedId == c.id
                       ? AppColors.colorFromHex(c.color)
-                      : Theme.of(context).brightness == Brightness.dark ? const Color(0xFF262C38) : const Color(0xFFE8EAF1),
+                      : Theme.of(context).brightness == Brightness.dark
+                          ? const Color(0xFF262C38)
+                          : const Color(0xFFE8EAF1),
                 ),
               ),
               child: ConstrainedBox(
-                constraints: BoxConstraints(maxWidth: MediaQuery.sizeOf(context).width * 0.55),
+                constraints: BoxConstraints(
+                    maxWidth: MediaQuery.sizeOf(context).width * 0.55),
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Icon(categoryIcon(c.name), size: 16, color: AppColors.colorFromHex(c.color)),
+                    Icon(categoryIcon(c.name),
+                        size: 16, color: AppColors.colorFromHex(c.color)),
                     const SizedBox(width: 6),
                     Flexible(
-                      child: Text(c.name, style: TextStyle(fontWeight: FontWeight.w600), maxLines: 1, overflow: TextOverflow.ellipsis),
+                      child: Text(c.name,
+                          style: TextStyle(fontWeight: FontWeight.w600),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis),
                     ),
                   ],
                 ),

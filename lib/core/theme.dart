@@ -24,7 +24,17 @@ class AppColors {
   static const Color textSecondaryDark = Color(0xFF9AA3B2);
 
   static const List<Color> brandGradient = [primary, Color(0xFF8B5CF6)];
-  static const List<Color> heroGradient = [Color(0xFF5B4BF0), Color(0xFF8B5CF6), Color(0xFFEC4899)];
+
+  // Semantic text-on-brand helpers
+  static const Color onHero = Colors.white;
+  static const Color onHeroMuted = Colors.white70;
+
+  // Reusable surface tokens
+  static const Color inputFillLight = Color(0xFFF0F1F6);
+  static const Color inputFillDark = Color(0xFF222834);
+  static const Color cardBorderLight = Color(0xFFEEF0F6);
+  static const Color cardBorderDark = Color(0xFF262C38);
+  static const Color heroDarkNavy = Color(0xFF16202E);
 
   static const List<Color> chartPalette = [
     Color(0xFF5B4BF0),
@@ -42,11 +52,22 @@ class AppColors {
   ];
 
   static const List<String> categoryColorPool = [
-    '#5B4BF0', '#14B8A6', '#FFB020', '#EC4899', '#3B82F6', '#F97316',
-    '#10B981', '#A855F7', '#EF4444', '#06B6D4', '#84CC16', '#F43F5E',
+    '#5B4BF0',
+    '#14B8A6',
+    '#FFB020',
+    '#EC4899',
+    '#3B82F6',
+    '#F97316',
+    '#10B981',
+    '#A855F7',
+    '#EF4444',
+    '#06B6D4',
+    '#84CC16',
+    '#F43F5E',
   ];
 
-  static Color colorFromHex(String hex, {Color fallback = const Color(0xFF6B7280)}) {
+  static Color colorFromHex(String hex,
+      {Color fallback = const Color(0xFF6B7280)}) {
     if (hex.isEmpty) return fallback;
     var value = hex.replaceAll('#', '');
     if (value.length == 6) value = 'FF$value';
@@ -58,6 +79,12 @@ class AppColors {
 
 class AppTheme {
   AppTheme._();
+
+  // Radius scale (design tokens)
+  static const double radiusSm = 12;
+  static const double radiusMd = 16;
+  static const double radiusLg = 20;
+  static const double radiusXl = 28;
 
   static ThemeData light() {
     final scheme = ColorScheme.fromSeed(
@@ -85,8 +112,10 @@ class AppTheme {
     final isDark = brightness == Brightness.dark;
     final bg = isDark ? AppColors.backgroundDark : AppColors.backgroundLight;
     final surface = isDark ? AppColors.surfaceDark : AppColors.surfaceLight;
-    final textPrimary = isDark ? AppColors.textPrimaryDark : AppColors.textPrimaryLight;
-    final textSecondary = isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight;
+    final textPrimary =
+        isDark ? AppColors.textPrimaryDark : AppColors.textPrimaryLight;
+    final textSecondary =
+        isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight;
 
     return ThemeData(
       useMaterial3: true,
@@ -94,12 +123,24 @@ class AppTheme {
       scaffoldBackgroundColor: bg,
       splashFactory: InkSparkle.splashFactory,
       textTheme: TextTheme(
-        displaySmall: TextStyle(fontSize: 34, fontWeight: FontWeight.w800, color: textPrimary, letterSpacing: -0.5),
-        headlineMedium: TextStyle(fontSize: 26, fontWeight: FontWeight.w800, color: textPrimary, letterSpacing: -0.4),
-        headlineSmall: TextStyle(fontSize: 21, fontWeight: FontWeight.w700, color: textPrimary),
-        titleLarge: TextStyle(fontSize: 18, fontWeight: FontWeight.w700, color: textPrimary),
-        titleMedium: TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: textPrimary),
-        titleSmall: TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: textPrimary),
+        displaySmall: TextStyle(
+            fontSize: 34,
+            fontWeight: FontWeight.w800,
+            color: textPrimary,
+            letterSpacing: -0.5),
+        headlineMedium: TextStyle(
+            fontSize: 26,
+            fontWeight: FontWeight.w800,
+            color: textPrimary,
+            letterSpacing: -0.4),
+        headlineSmall: TextStyle(
+            fontSize: 21, fontWeight: FontWeight.w700, color: textPrimary),
+        titleLarge: TextStyle(
+            fontSize: 18, fontWeight: FontWeight.w700, color: textPrimary),
+        titleMedium: TextStyle(
+            fontSize: 16, fontWeight: FontWeight.w600, color: textPrimary),
+        titleSmall: TextStyle(
+            fontSize: 14, fontWeight: FontWeight.w600, color: textPrimary),
         bodyLarge: TextStyle(fontSize: 16, color: textPrimary),
         bodyMedium: TextStyle(fontSize: 14, color: textPrimary),
         bodySmall: TextStyle(fontSize: 12, color: textSecondary),
@@ -110,29 +151,32 @@ class AppTheme {
         surfaceTintColor: Colors.transparent,
         elevation: 0,
         centerTitle: false,
-        titleTextStyle: TextStyle(fontSize: 20, fontWeight: FontWeight.w800, color: textPrimary),
+        titleTextStyle: TextStyle(
+            fontSize: 20, fontWeight: FontWeight.w800, color: textPrimary),
         iconTheme: IconThemeData(color: textPrimary),
       ),
       cardTheme: CardThemeData(
         color: surface,
         elevation: 0,
         margin: EdgeInsets.zero,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(AppTheme.radiusLg)),
       ),
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
-        fillColor: isDark ? AppColors.surfaceDark2 : const Color(0xFFF0F1F6),
-        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 15),
+        fillColor: isDark ? AppColors.inputFillDark : AppColors.inputFillLight,
+        contentPadding:
+            const EdgeInsets.symmetric(horizontal: 16, vertical: 15),
         border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(14),
+          borderRadius: BorderRadius.circular(AppTheme.radiusMd),
           borderSide: BorderSide.none,
         ),
         enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(14),
+          borderRadius: BorderRadius.circular(AppTheme.radiusMd),
           borderSide: BorderSide.none,
         ),
         focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(14),
+          borderRadius: BorderRadius.circular(AppTheme.radiusMd),
           borderSide: const BorderSide(color: AppColors.primary, width: 1.6),
         ),
         hintStyle: TextStyle(color: textSecondary.withValues(alpha: 0.8)),
@@ -142,16 +186,19 @@ class AppTheme {
           backgroundColor: AppColors.primary,
           foregroundColor: Colors.white,
           minimumSize: const Size(double.infinity, 52),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(AppTheme.radiusMd)),
           textStyle: const TextStyle(fontSize: 15, fontWeight: FontWeight.w700),
         ),
       ),
       outlinedButtonTheme: OutlinedButtonThemeData(
         style: OutlinedButton.styleFrom(
           foregroundColor: AppColors.primary,
-          side: BorderSide(color: isDark ? AppColors.surfaceDark2 : const Color(0xFFE2E5ED)),
+          side: BorderSide(
+              color: isDark ? AppColors.surfaceDark2 : const Color(0xFFE2E5ED)),
           minimumSize: const Size(double.infinity, 52),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(AppTheme.radiusMd)),
           textStyle: const TextStyle(fontSize: 15, fontWeight: FontWeight.w700),
         ),
       ),
@@ -161,10 +208,11 @@ class AppTheme {
       floatingActionButtonTheme: const FloatingActionButtonThemeData(
         backgroundColor: AppColors.primary,
         foregroundColor: Colors.white,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(18))),
+        shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.all(Radius.circular(AppTheme.radiusMd))),
       ),
       dividerTheme: DividerThemeData(
-        color: isDark ? AppColors.surfaceDark2 : const Color(0xFFEFF1F6),
+        color: isDark ? AppColors.surfaceDark2 : AppColors.cardBorderLight,
         thickness: 1,
         space: 1,
       ),
@@ -173,56 +221,75 @@ class AppTheme {
         selectedItemColor: AppColors.primary,
         unselectedItemColor: textSecondary,
         type: BottomNavigationBarType.fixed,
-        selectedLabelStyle: const TextStyle(fontSize: 12, fontWeight: FontWeight.w700),
-        unselectedLabelStyle: const TextStyle(fontSize: 12, fontWeight: FontWeight.w500),
+        selectedLabelStyle:
+            const TextStyle(fontSize: 12, fontWeight: FontWeight.w700),
+        unselectedLabelStyle:
+            const TextStyle(fontSize: 12, fontWeight: FontWeight.w500),
       ),
       navigationBarTheme: NavigationBarThemeData(
         backgroundColor: surface,
         indicatorColor: AppColors.primary.withValues(alpha: 0.12),
-        height: 64,
+        height: 66,
         labelTextStyle: WidgetStateProperty.resolveWith((states) => TextStyle(
-              fontSize: 11.5,
-              fontWeight: states.contains(WidgetState.selected) ? FontWeight.w700 : FontWeight.w500,
-              color: states.contains(WidgetState.selected) ? AppColors.primary : textSecondary,
+              fontSize: 12,
+              fontWeight: states.contains(WidgetState.selected)
+                  ? FontWeight.w700
+                  : FontWeight.w500,
+              color: states.contains(WidgetState.selected)
+                  ? AppColors.primary
+                  : textSecondary,
             )),
         iconTheme: WidgetStateProperty.resolveWith((states) => IconThemeData(
-              color: states.contains(WidgetState.selected) ? AppColors.primary : textSecondary,
+              color: states.contains(WidgetState.selected)
+                  ? AppColors.primary
+                  : textSecondary,
               size: 23,
             )),
       ),
       snackBarTheme: SnackBarThemeData(
         behavior: SnackBarBehavior.floating,
-        backgroundColor: isDark ? AppColors.surfaceDark2 : const Color(0xFF2A2F3A),
+        backgroundColor:
+            isDark ? AppColors.surfaceDark2 : const Color(0xFF2A2F3A),
         contentTextStyle: const TextStyle(color: Colors.white),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(AppTheme.radiusSm)),
       ),
       dialogTheme: DialogThemeData(
         backgroundColor: surface,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+        shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(AppTheme.radiusXl)),
       ),
       bottomSheetTheme: BottomSheetThemeData(
         backgroundColor: surface,
         shape: const RoundedRectangleBorder(
-          borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
+          borderRadius:
+              BorderRadius.vertical(top: Radius.circular(AppTheme.radiusXl)),
         ),
       ),
       switchTheme: SwitchThemeData(
         thumbColor: WidgetStateProperty.resolveWith((states) =>
-            states.contains(WidgetState.selected) ? Colors.white : textSecondary),
+            states.contains(WidgetState.selected)
+                ? Colors.white
+                : textSecondary),
         trackColor: WidgetStateProperty.resolveWith((states) =>
-            states.contains(WidgetState.selected) ? AppColors.primary : AppColors.surfaceDark2),
+            states.contains(WidgetState.selected)
+                ? AppColors.primary
+                : AppColors.surfaceDark2),
       ),
       chipTheme: ChipThemeData(
-        backgroundColor: isDark ? AppColors.surfaceDark2 : const Color(0xFFF0F1F6),
+        backgroundColor:
+            isDark ? AppColors.surfaceDark2 : AppColors.inputFillLight,
         selectedColor: AppColors.primary,
         labelStyle: TextStyle(color: textPrimary, fontSize: 13),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+        shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(AppTheme.radiusSm)),
         side: BorderSide.none,
         padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
       ),
       progressIndicatorTheme: ProgressIndicatorThemeData(
         color: AppColors.primary,
-        linearTrackColor: isDark ? AppColors.surfaceDark2 : const Color(0xFFE9EBF2),
+        linearTrackColor:
+            isDark ? AppColors.surfaceDark2 : AppColors.inputFillLight,
       ),
       datePickerTheme: DatePickerThemeData(
         backgroundColor: surface,

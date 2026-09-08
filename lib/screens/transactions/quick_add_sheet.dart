@@ -33,85 +33,86 @@ class QuickAddSheet extends StatelessWidget {
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-            Center(
-              child: Container(
-                width: 42,
-                height: 4,
-                decoration: BoxDecoration(
-                  color: Theme.of(context).dividerColor,
-                  borderRadius: BorderRadius.circular(4),
+              Center(
+                child: Container(
+                  width: 42,
+                  height: 4,
+                  decoration: BoxDecoration(
+                    color: Theme.of(context).dividerColor,
+                    borderRadius: BorderRadius.circular(4),
+                  ),
                 ),
               ),
-            ),
-            const SizedBox(height: 16),
-            Text('Quick add', style: Theme.of(context).textTheme.headlineSmall),
-            const SizedBox(height: 16),
-            Row(
-              children: [
-                Expanded(
-                  child: _ActionCard(
-                    label: 'Expense',
-                    icon: Icons.remove_circle_outline,
-                    color: AppColors.expense,
-                    onTap: () => _open(context, const ExpenseFormScreen()),
+              const SizedBox(height: 16),
+              Text('Quick add',
+                  style: Theme.of(context).textTheme.headlineSmall),
+              const SizedBox(height: 16),
+              Row(
+                children: [
+                  Expanded(
+                    child: _ActionCard(
+                      label: 'Expense',
+                      icon: Icons.remove_circle_outline,
+                      color: AppColors.expense,
+                      onTap: () => _open(context, const ExpenseFormScreen()),
+                    ),
                   ),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: _ActionCard(
-                    label: 'Income',
-                    icon: Icons.add_circle_outline,
-                    color: AppColors.income,
-                    onTap: () => _open(context, const IncomeFormScreen()),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: _ActionCard(
+                      label: 'Income',
+                      icon: Icons.add_circle_outline,
+                      color: AppColors.income,
+                      onTap: () => _open(context, const IncomeFormScreen()),
+                    ),
                   ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 12),
-            Row(
-              children: [
-                Expanded(
-                  child: _ActionCard(
-                    label: 'Recurring',
-                    icon: Icons.autorenew,
-                    color: AppColors.secondary,
-                    onTap: () => _open(context, const RecurringFormScreen()),
+                ],
+              ),
+              const SizedBox(height: 12),
+              Row(
+                children: [
+                  Expanded(
+                    child: _ActionCard(
+                      label: 'Recurring',
+                      icon: Icons.autorenew,
+                      color: AppColors.secondary,
+                      onTap: () => _open(context, const RecurringFormScreen()),
+                    ),
                   ),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: _ActionCard(
-                    label: 'Receipts',
-                    icon: Icons.receipt_long_outlined,
-                    color: AppColors.accent,
-                    onTap: () => _open(context, const ReceiptsScreen()),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: _ActionCard(
+                      label: 'Receipts',
+                      icon: Icons.receipt_long_outlined,
+                      color: AppColors.accent,
+                      onTap: () => _open(context, const ReceiptsScreen()),
+                    ),
                   ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 12),
-            Row(
-              children: [
-                Expanded(
-                  child: _ActionCard(
-                    label: 'Scan receipt',
-                    icon: Icons.document_scanner_outlined,
-                    color: AppColors.primary,
-                    onTap: () => _open(context, const ScanReceiptScreen()),
+                ],
+              ),
+              const SizedBox(height: 12),
+              Row(
+                children: [
+                  Expanded(
+                    child: _ActionCard(
+                      label: 'Scan receipt',
+                      icon: Icons.document_scanner_outlined,
+                      color: AppColors.primary,
+                      onTap: () => _open(context, const ScanReceiptScreen()),
+                    ),
                   ),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: _ActionCard(
-                    label: 'Assistant',
-                    icon: Icons.smart_toy_outlined,
-                    color: AppColors.secondary,
-                    onTap: () => _open(context, const AssistantScreen()),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: _ActionCard(
+                      label: 'Assistant',
+                      icon: Icons.forum_outlined,
+                      color: AppColors.secondary,
+                      onTap: () => _open(context, const AssistantScreen()),
+                    ),
                   ),
-                ),
-              ],
-            ),
-          ],
+                ],
+              ),
+            ],
           ),
         ),
       ),
@@ -125,7 +126,11 @@ class _ActionCard extends StatelessWidget {
   final Color color;
   final VoidCallback onTap;
 
-  const _ActionCard({required this.label, required this.icon, required this.color, required this.onTap});
+  const _ActionCard(
+      {required this.label,
+      required this.icon,
+      required this.color,
+      required this.onTap});
 
   @override
   Widget build(BuildContext context) {
@@ -141,7 +146,8 @@ class _ActionCard extends StatelessWidget {
             children: [
               Icon(icon, color: color, size: 30),
               const SizedBox(height: 10),
-              Text(label, style: TextStyle(fontWeight: FontWeight.w700, color: color)),
+              Text(label,
+                  style: TextStyle(fontWeight: FontWeight.w700, color: color)),
             ],
           ),
         ),

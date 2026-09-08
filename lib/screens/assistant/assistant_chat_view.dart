@@ -87,7 +87,8 @@ class AssistantChatViewState extends State<AssistantChatView> {
           final logged = await _logDraft(repo, draft, user.preferredCurrency);
           payload = jsonEncode(logged);
           kind = draft.type;
-          reply = '👍 Saved. I logged ${draft.type == 'expense' ? 'expense' : 'income'} of ${formatMoney(draft.amount, user.preferredCurrency)} — "${draft.description}". Tap Undo to remove it.';
+          reply =
+              'Saved. I logged ${draft.type == 'expense' ? 'expense' : 'income'} of ${formatMoney(draft.amount, user.preferredCurrency)} — "${draft.description}". Tap Undo to remove it.';
           appState.bumpData();
         } catch (e) {
           reply = 'I couldn\'t save that. Please try again.';
@@ -99,19 +100,22 @@ class AssistantChatViewState extends State<AssistantChatView> {
       reply = intent.reply;
       if (intent.autoPost && intent.draft != null) {
         try {
-          final logged = await _logDraft(repo, intent.draft!, user.preferredCurrency);
+          final logged =
+              await _logDraft(repo, intent.draft!, user.preferredCurrency);
           payload = jsonEncode(logged);
           appState.bumpData();
         } catch (e) {
           kind = 'text';
-          reply = 'I understood your intent but couldn\'t save it. Make sure you have at least one category set up (Settings > Categories), then try again.';
+          reply =
+              'I understood your intent but couldn\'t save it. Make sure you have at least one category set up (Settings > Categories), then try again.';
         }
       } else if (intent.draft != null) {
         _pendingDraft = intent.draft;
       }
     }
 
-    await repo.addChatMessage(role: 'assistant', kind: kind, text: reply, payload: payload);
+    await repo.addChatMessage(
+        role: 'assistant', kind: kind, text: reply, payload: payload);
     final messages = await repo.getChatMessages();
     if (!mounted) return;
     setState(() {
@@ -126,8 +130,10 @@ class AssistantChatViewState extends State<AssistantChatView> {
     return RegExp(r'^(yes|yeah|yep|ok|okay|sige|oo|go|sure)\b').hasMatch(lower);
   }
 
-  Future<Map<String, dynamic>> _logDraft(AppRepository repo, AssistantDraft draft, String currencyCode) async {
-    final dateStr = '${draft.date.year.toString().padLeft(4, '0')}-${draft.date.month.toString().padLeft(2, '0')}-${draft.date.day.toString().padLeft(2, '0')}';
+  Future<Map<String, dynamic>> _logDraft(
+      AppRepository repo, AssistantDraft draft, String currencyCode) async {
+    final dateStr =
+        '${draft.date.year.toString().padLeft(4, '0')}-${draft.date.month.toString().padLeft(2, '0')}-${draft.date.day.toString().padLeft(2, '0')}';
 
     if (draft.type == 'income') {
       final income = await repo.saveIncome(
@@ -142,10 +148,17 @@ class AssistantChatViewState extends State<AssistantChatView> {
       await repo.addNotification(
         type: 'assistant',
         title: 'TrackMe Assistant',
-        body: '💰 Logged income ${formatMoney(draft.amount, currencyCode)} — ${draft.description}',
+        body:
+            'Logged income ${formatMoney(draft.amount, currencyCode)} — ${draft.description}',
       );
-      await repo.logActivity('assistant', "Assistant logged income '$draft.description' ($currencyCode ${draft.amount.toStringAsFixed(2)})");
-      return {'id': income.id, 'type': 'income', 'amount': draft.amount, 'description': draft.description};
+      await repo.logActivity('assistant',
+          "Assistant logged income '$draft.description' ($currencyCode ${draft.amount.toStringAsFixed(2)})");
+      return {
+        'id': income.id,
+        'type': 'income',
+        'amount': draft.amount,
+        'description': draft.description
+      };
     }
 
     int? categoryId;
@@ -174,10 +187,17 @@ class AssistantChatViewState extends State<AssistantChatView> {
     await repo.addNotification(
       type: 'assistant',
       title: 'TrackMe Assistant',
-      body: '🧾 Logged expense ${formatMoney(draft.amount, currencyCode)} — ${draft.description}',
+      body:
+          'Logged expense ${formatMoney(draft.amount, currencyCode)} — ${draft.description}',
     );
-    await repo.logActivity('assistant', "Assistant logged expense '$draft.description' ($currencyCode ${draft.amount.toStringAsFixed(2)})");
-    return {'id': result.expense.id, 'type': 'expense', 'amount': draft.amount, 'description': draft.description};
+    await repo.logActivity('assistant',
+        "Assistant logged expense '$draft.description' ($currencyCode ${draft.amount.toStringAsFixed(2)})");
+    return {
+      'id': result.expense.id,
+      'type': 'expense',
+      'amount': draft.amount,
+      'description': draft.description
+    };
   }
 
   Future<void> _handleUndo(ChatMessage message) async {
@@ -201,17 +221,20 @@ class AssistantChatViewState extends State<AssistantChatView> {
         title: 'TrackMe Assistant',
         body: '$description (${amount.toStringAsFixed(2)}) was removed.',
       );
-      await repo.logActivity('assistant', "Assistant undid $type '$description'");
+      await repo.logActivity(
+          'assistant', "Assistant undid $type '$description'");
       await repo.addChatMessage(
         role: 'assistant',
         kind: type,
-        text: '↩️ Done! I removed "$description" (${formatMoney(amount, await _currency())}). Anything else?',
+        text:
+            'Done! I removed "$description" (${formatMoney(amount, await _currency())}). Anything else?',
       );
       appState.bumpData();
       await _load();
     } catch (e) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Could not undo: $e')));
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text('Could not undo: $e')));
     }
   }
 
@@ -279,7 +302,10 @@ class AssistantChatViewState extends State<AssistantChatView> {
             padding: const EdgeInsets.only(left: 16, bottom: 6),
             child: Align(
               alignment: Alignment.centerLeft,
-              child: Text('tracking…', style: TextStyle(fontSize: 12, color: Theme.of(context).textTheme.bodySmall!.color)),
+              child: Text('tracking…',
+                  style: TextStyle(
+                      fontSize: 12,
+                      color: Theme.of(context).textTheme.bodySmall!.color)),
             ),
           ),
         _buildInputBar(context),
@@ -305,15 +331,20 @@ class AssistantChatViewState extends State<AssistantChatView> {
                 gradient: LinearGradient(colors: AppColors.brandGradient),
                 shape: BoxShape.circle,
               ),
-              child: const Icon(Icons.forum_outlined, color: Colors.white, size: 34),
+              child: const Icon(Icons.forum_outlined,
+                  color: Colors.white, size: 34),
             ),
             const SizedBox(height: 18),
-            Text('Hello! I can add your spendings for you.', style: Theme.of(context).textTheme.titleMedium),
+            Text('Hello! I can add your spendings for you.',
+                style: Theme.of(context).textTheme.titleMedium),
             const SizedBox(height: 6),
             Text(
               'Just chat to me like a support agent:\n"I paid 100 pesos for food" — and I will log it automatically.',
               textAlign: TextAlign.center,
-              style: TextStyle(fontSize: 13, height: 1.5, color: Theme.of(context).textTheme.bodySmall!.color),
+              style: TextStyle(
+                  fontSize: 13,
+                  height: 1.5,
+                  color: Theme.of(context).textTheme.bodySmall!.color),
             ),
             const SizedBox(height: 20),
             Wrap(
@@ -321,9 +352,15 @@ class AssistantChatViewState extends State<AssistantChatView> {
               spacing: 8,
               runSpacing: 8,
               children: [
-                _SuggestionChip(text: 'I paid 100 pesos for food', onTap: () => suggest('I paid 100 pesos for food')),
-                _SuggestionChip(text: 'Bought groceries ₱500 via gcash', onTap: () => suggest('Bought groceries ₱500 via gcash')),
-                _SuggestionChip(text: 'I received my salary 25000', onTap: () => suggest('I received my salary 25000')),
+                _SuggestionChip(
+                    text: 'I paid 100 pesos for food',
+                    onTap: () => suggest('I paid 100 pesos for food')),
+                _SuggestionChip(
+                    text: 'Bought groceries ₱500 via gcash',
+                    onTap: () => suggest('Bought groceries ₱500 via gcash')),
+                _SuggestionChip(
+                    text: 'I received my salary 25000',
+                    onTap: () => suggest('I received my salary 25000')),
                 _SuggestionChip(text: 'Help', onTap: () => suggest('Help')),
               ],
             ),
@@ -339,7 +376,8 @@ class AssistantChatViewState extends State<AssistantChatView> {
       decoration: BoxDecoration(
         color: Theme.of(context).colorScheme.surface,
         border: Border(
-          top: BorderSide(color: Theme.of(context).dividerColor.withValues(alpha: 0.5)),
+          top: BorderSide(
+              color: Theme.of(context).dividerColor.withValues(alpha: 0.5)),
         ),
       ),
       child: Row(
@@ -382,7 +420,9 @@ class _DayDivider extends StatelessWidget {
         child: Container(
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
           decoration: BoxDecoration(
-            color: Theme.of(context).brightness == Brightness.dark ? AppColors.surfaceDark2 : const Color(0xFFE9EBF2),
+            color: Theme.of(context).brightness == Brightness.dark
+                ? AppColors.surfaceDark2
+                : const Color(0xFFE9EBF2),
             borderRadius: BorderRadius.circular(20),
           ),
           child: Text(
@@ -426,14 +466,16 @@ class _MessageBubble extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isUser = message.isUser;
-    final isPost = !isUser && (message.kind == 'expense' || message.kind == 'income');
+    final isPost =
+        !isUser && (message.kind == 'expense' || message.kind == 'income');
     final time = _timeOfDay(message.createdAt);
 
     return Padding(
       padding: const EdgeInsets.only(bottom: 10),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisAlignment: isUser ? MainAxisAlignment.end : MainAxisAlignment.start,
+        mainAxisAlignment:
+            isUser ? MainAxisAlignment.end : MainAxisAlignment.start,
         children: [
           if (!isUser) ...[
             Container(
@@ -443,7 +485,8 @@ class _MessageBubble extends StatelessWidget {
                 gradient: LinearGradient(colors: AppColors.brandGradient),
                 shape: BoxShape.circle,
               ),
-              child: const Icon(Icons.smart_toy_outlined, color: Colors.white, size: 16),
+              child: const Icon(Icons.forum_outlined,
+                  color: Colors.white, size: 16),
             ),
             const SizedBox(width: 8),
           ],
@@ -465,7 +508,9 @@ class _MessageBubble extends StatelessWidget {
                 border: isUser
                     ? null
                     : Border.all(
-                        color: Theme.of(context).brightness == Brightness.dark ? const Color(0xFF262C38) : const Color(0xFFE8EAF1),
+                        color: Theme.of(context).brightness == Brightness.dark
+                            ? const Color(0xFF262C38)
+                            : const Color(0xFFE8EAF1),
                       ),
               ),
               child: Column(
@@ -476,7 +521,9 @@ class _MessageBubble extends StatelessWidget {
                     style: TextStyle(
                       fontSize: 13.5,
                       height: 1.45,
-                      color: isUser ? Colors.white : Theme.of(context).textTheme.bodyLarge!.color,
+                      color: isUser
+                          ? Colors.white
+                          : Theme.of(context).textTheme.bodyLarge!.color,
                     ),
                   ),
                   if (isPost) ...[
@@ -487,7 +534,8 @@ class _MessageBubble extends StatelessWidget {
                         InkWell(
                           onTap: onUndo,
                           child: Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 10, vertical: 5),
                             decoration: BoxDecoration(
                               color: AppColors.danger.withValues(alpha: 0.12),
                               borderRadius: BorderRadius.circular(20),
@@ -495,9 +543,14 @@ class _MessageBubble extends StatelessWidget {
                             child: const Row(
                               mainAxisSize: MainAxisSize.min,
                               children: [
-                                Icon(Icons.undo, size: 14, color: AppColors.danger),
+                                Icon(Icons.undo,
+                                    size: 14, color: AppColors.danger),
                                 SizedBox(width: 5),
-                                Text('Undo', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: AppColors.danger)),
+                                Text('Undo',
+                                    style: TextStyle(
+                                        fontSize: 12,
+                                        fontWeight: FontWeight.w700,
+                                        color: AppColors.danger)),
                               ],
                             ),
                           ),
@@ -506,7 +559,12 @@ class _MessageBubble extends StatelessWidget {
                         Flexible(
                           child: Text(
                             time.isEmpty ? 'Added just now' : 'Added · $time',
-                            style: TextStyle(fontSize: 11, color: Theme.of(context).textTheme.bodySmall!.color),
+                            style: TextStyle(
+                                fontSize: 11,
+                                color: Theme.of(context)
+                                    .textTheme
+                                    .bodySmall!
+                                    .color),
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                           ),
@@ -523,8 +581,12 @@ class _MessageBubble extends StatelessWidget {
                           style: TextStyle(
                             fontSize: 10,
                             color: (isUser
-                                ? Colors.white
-                                : Theme.of(context).textTheme.bodySmall?.color ?? Colors.grey)
+                                    ? Colors.white
+                                    : Theme.of(context)
+                                            .textTheme
+                                            .bodySmall
+                                            ?.color ??
+                                        Colors.grey)
                                 .withValues(alpha: 0.75),
                           ),
                         ),

@@ -135,8 +135,7 @@ class _AssistantBubble extends StatelessWidget {
             child: Stack(
               alignment: Alignment.center,
               children: [
-                const Icon(Icons.smart_toy_outlined,
-                    color: Colors.white, size: 27),
+                const Icon(Icons.forum_outlined, color: Colors.white, size: 27),
                 Positioned(
                   right: 3,
                   bottom: 3,
@@ -229,8 +228,8 @@ class _AssistantPanel extends StatelessWidget {
               gradient: LinearGradient(colors: AppColors.brandGradient),
               shape: BoxShape.circle,
             ),
-            child: const Icon(Icons.smart_toy_outlined,
-                color: Colors.white, size: 19),
+            child:
+                const Icon(Icons.forum_outlined, color: Colors.white, size: 19),
           ),
           const SizedBox(width: 10),
           Expanded(

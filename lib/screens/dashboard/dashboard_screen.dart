@@ -30,20 +30,43 @@ class _DashboardScreenState extends State<DashboardScreen> {
   late Future<_DashboardData> _future;
   int _lastVersion = -1;
 
-  static const List<String> _shortMonths = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+  static const List<String> _shortMonths = [
+    'Jan',
+    'Feb',
+    'Mar',
+    'Apr',
+    'May',
+    'Jun',
+    'Jul',
+    'Aug',
+    'Sep',
+    'Oct',
+    'Nov',
+    'Dec'
+  ];
 
   Future<_DashboardData> _load() async {
     final repo = AppRepository.instance;
     final user = await repo.getUser();
 
     final now = DateTime.now();
-    final monthStart = DateTime(now.year, now.month, 1).toIso8601String().substring(0, 10);
-    final monthEnd = DateTime(now.year, now.month + 1, 0).toIso8601String().substring(0, 10);
+    final monthStart =
+        DateTime(now.year, now.month, 1).toIso8601String().substring(0, 10);
+    final monthEnd =
+        DateTime(now.year, now.month + 1, 0).toIso8601String().substring(0, 10);
 
     final allExpenses = await repo.getExpenses();
     final allIncomes = await repo.getIncomes();
-    final monthExpenses = allExpenses.where((e) => e.expenseDate.compareTo(monthStart) >= 0 && e.expenseDate.compareTo(monthEnd) <= 0).toList();
-    final monthIncomes = allIncomes.where((i) => i.incomeDate.compareTo(monthStart) >= 0 && i.incomeDate.compareTo(monthEnd) <= 0).toList();
+    final monthExpenses = allExpenses
+        .where((e) =>
+            e.expenseDate.compareTo(monthStart) >= 0 &&
+            e.expenseDate.compareTo(monthEnd) <= 0)
+        .toList();
+    final monthIncomes = allIncomes
+        .where((i) =>
+            i.incomeDate.compareTo(monthStart) >= 0 &&
+            i.incomeDate.compareTo(monthEnd) <= 0)
+        .toList();
 
     final totalMonthExpense = monthExpenses.fold(0.0, (s, e) => s + e.amount);
     final totalMonthIncome = monthIncomes.fold(0.0, (s, i) => s + i.amount);
@@ -57,7 +80,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
     for (var i = 11; i >= 0; i--) {
       final d = DateTime(now.year, now.month - i, 1);
       final key = '${d.year}' + d.month.toString().padLeft(2, '0');
-      trend.add(_TrendPoint('${_shortMonths[d.month - 1]}', monthlyIncome[key] ?? 0, monthlyExpense[key] ?? 0));
+      trend.add(_TrendPoint('${_shortMonths[d.month - 1]}',
+          monthlyIncome[key] ?? 0, monthlyExpense[key] ?? 0));
     }
 
     // category breakdown current month
@@ -65,17 +89,25 @@ class _DashboardScreenState extends State<DashboardScreen> {
     final catColors = <String, String>{};
     for (final e in monthExpenses) {
       final name = e.categoryName ?? 'Uncategorized';
-      catMap[name] = [(catMap[name]?[0] ?? 0) + e.amount, (catMap[name]?[1] ?? 0) + 1];
+      catMap[name] = [
+        (catMap[name]?[0] ?? 0) + e.amount,
+        (catMap[name]?[1] ?? 0) + 1
+      ];
       catColors[name] = e.categoryColor ?? '#6b7280';
     }
     final categories = catMap.entries
-        .map((e) => _CategorySlice(e.key, e.value[0], e.value[1].toInt(), catColors[e.key] ?? '#6b7280'))
+        .map((e) => _CategorySlice(e.key, e.value[0], e.value[1].toInt(),
+            catColors[e.key] ?? '#6b7280'))
         .toList()
       ..sort((a, b) => b.total.compareTo(a.total));
 
-    final recent = (monthExpenses.isNotEmpty ? monthExpenses : allExpenses.take(5)).isNotEmpty
-        ? (monthExpenses.isNotEmpty ? monthExpenses : allExpenses.take(5).toList())
-        : <Expense>[];
+    final recent =
+        (monthExpenses.isNotEmpty ? monthExpenses : allExpenses.take(5))
+                .isNotEmpty
+            ? (monthExpenses.isNotEmpty
+                ? monthExpenses
+                : allExpenses.take(5).toList())
+            : <Expense>[];
 
     final activeGoals = await repo.getGoals(status: 'active');
     final budgets = await repo.getBudgetSpendings();
@@ -84,13 +116,18 @@ class _DashboardScreenState extends State<DashboardScreen> {
     final loans = await repo.getLoans();
     final loanNames = {for (final l in loans) l.id: l.name};
     final upcomingRepayments = [
-      for (final p in upcoming) _UpcomingRepayment(p, loanNames[p.loanId] ?? 'Loan'),
+      for (final p in upcoming)
+        _UpcomingRepayment(p, loanNames[p.loanId] ?? 'Loan'),
     ];
 
-    final lastMonthStart = DateTime(now.year, now.month - 1, 1).toIso8601String().substring(0, 10);
-    final lastMonthEnd = DateTime(now.year, now.month, 0).toIso8601String().substring(0, 10);
+    final lastMonthStart =
+        DateTime(now.year, now.month - 1, 1).toIso8601String().substring(0, 10);
+    final lastMonthEnd =
+        DateTime(now.year, now.month, 0).toIso8601String().substring(0, 10);
     final lastMonthExpenses = allExpenses
-        .where((e) => e.expenseDate.compareTo(lastMonthStart) >= 0 && e.expenseDate.compareTo(lastMonthEnd) <= 0)
+        .where((e) =>
+            e.expenseDate.compareTo(lastMonthStart) >= 0 &&
+            e.expenseDate.compareTo(lastMonthEnd) <= 0)
         .fold(0.0, (s, e) => s + e.amount);
 
     return _DashboardData(
@@ -100,7 +137,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
       totalIncomeAll: totalIncomeAll,
       totalExpenseAll: totalExpenseAll,
       netWorth: totalIncomeAll - totalExpenseAll,
-      averageExpense: monthExpenses.isEmpty ? 0 : totalMonthExpense / monthExpenses.length,
+      averageExpense:
+          monthExpenses.isEmpty ? 0 : totalMonthExpense / monthExpenses.length,
       lastMonthExpense: lastMonthExpenses,
       trend: trend,
       categories: categories,
@@ -136,13 +174,15 @@ class _DashboardScreenState extends State<DashboardScreen> {
         actions: [
           IconButton(
             tooltip: 'Reports',
-            onPressed: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const ReportsScreen())),
+            onPressed: () => Navigator.of(context)
+                .push(MaterialPageRoute(builder: (_) => const ReportsScreen())),
             icon: const Icon(Icons.bar_chart),
           ),
           IconButton(
             tooltip: 'Notifications',
             onPressed: () async {
-              await Navigator.of(context).push(MaterialPageRoute(builder: (_) => const NotificationCenterScreen()));
+              await Navigator.of(context).push(MaterialPageRoute(
+                  builder: (_) => const NotificationCenterScreen()));
               reload();
             },
             icon: const Icon(Icons.notifications_outlined),
@@ -250,7 +290,8 @@ class _DashboardBodyState extends State<_DashboardBody> {
             Expanded(
               child: StatTile(
                 label: 'Spent this month',
-                value: MoneyText(d.totalMonthExpense, cur, fontSize: 15, color: AppColors.expense),
+                value: MoneyText(d.totalMonthExpense, cur,
+                    fontSize: 15, color: AppColors.expense),
                 icon: Icons.trending_down,
                 iconColor: AppColors.expense,
               ),
@@ -259,7 +300,8 @@ class _DashboardBodyState extends State<_DashboardBody> {
             Expanded(
               child: StatTile(
                 label: 'Earned this month',
-                value: MoneyText(d.totalMonthIncome, cur, fontSize: 15, color: AppColors.income),
+                value: MoneyText(d.totalMonthIncome, cur,
+                    fontSize: 15, color: AppColors.income),
                 icon: Icons.trending_up,
                 iconColor: AppColors.income,
               ),
@@ -292,18 +334,24 @@ class _DashboardBodyState extends State<_DashboardBody> {
           AppCard(
             child: Column(
               children: [
-                const Icon(Icons.rocket_launch_outlined, size: 40, color: AppColors.primary),
+                const Icon(Icons.wallet_outlined,
+                    size: 40, color: AppColors.primary),
                 const SizedBox(height: 12),
-                Text('Welcome to ${AppStrings.appName}!', style: Theme.of(context).textTheme.titleMedium),
+                Text('Welcome to ${AppStrings.appName}!',
+                    style: Theme.of(context).textTheme.titleMedium),
                 const SizedBox(height: 6),
-                Text('Add your first expense or income using the + button below.',
-                    textAlign: TextAlign.center, style: TextStyle(color: Theme.of(context).textTheme.bodySmall!.color)),
+                Text(
+                    'Add your first expense or income using the + button below.',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                        color: Theme.of(context).textTheme.bodySmall!.color)),
               ],
             ),
           ),
         ],
         const SizedBox(height: 22),
-        Text('This year overview', style: Theme.of(context).textTheme.titleMedium),
+        Text('This year overview',
+            style: Theme.of(context).textTheme.titleMedium),
         const SizedBox(height: 12),
         AppCard(
           padding: const EdgeInsets.all(16),
@@ -327,19 +375,27 @@ class _DashboardBodyState extends State<_DashboardBody> {
         ),
         if (d.categories.isNotEmpty) ...[
           const SizedBox(height: 22),
-          Text('Spending by category', style: Theme.of(context).textTheme.titleMedium),
+          Text('Spending by category',
+              style: Theme.of(context).textTheme.titleMedium),
           const SizedBox(height: 12),
           AppCard(
             padding: const EdgeInsets.all(16),
             child: Row(
               children: [
                 if (d.categories.length > 1)
-                  SizedBox(width: 108, height: 108, child: _DonutChart(slices: d.categories))
+                  SizedBox(
+                      width: 108,
+                      height: 108,
+                      child: _DonutChart(slices: d.categories))
                 else
                   SizedBox(
                     width: 108,
                     height: 108,
-                    child: Center(child: Icon(Icons.pie_chart_outline, size: 44, color: Theme.of(context).textTheme.bodySmall!.color)),
+                    child: Center(
+                        child: Icon(Icons.pie_chart_outline,
+                            size: 44,
+                            color:
+                                Theme.of(context).textTheme.bodySmall!.color)),
                   ),
                 const SizedBox(width: 16),
                 Expanded(
@@ -350,15 +406,25 @@ class _DashboardBodyState extends State<_DashboardBody> {
                           padding: const EdgeInsets.symmetric(vertical: 4),
                           child: Row(
                             children: [
-                              Container(width: 10, height: 10, decoration: BoxDecoration(color: AppColors.colorFromHex(c.color), shape: BoxShape.circle)),
+                              Container(
+                                  width: 10,
+                                  height: 10,
+                                  decoration: BoxDecoration(
+                                      color: AppColors.colorFromHex(c.color),
+                                      shape: BoxShape.circle)),
                               const SizedBox(width: 8),
                               Expanded(
-                                child: Text(c.name, style: const TextStyle(fontSize: 12.5), maxLines: 1, overflow: TextOverflow.ellipsis),
+                                child: Text(c.name,
+                                    style: const TextStyle(fontSize: 12.5),
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis),
                               ),
                               Flexible(
                                 child: Text(
                                   formatMoney(c.total, cur),
-                                  style: const TextStyle(fontSize: 12.5, fontWeight: FontWeight.w700),
+                                  style: const TextStyle(
+                                      fontSize: 12.5,
+                                      fontWeight: FontWeight.w700),
                                   maxLines: 1,
                                   overflow: TextOverflow.ellipsis,
                                 ),
@@ -375,39 +441,70 @@ class _DashboardBodyState extends State<_DashboardBody> {
         ],
         if (d.budgetSpendings.isNotEmpty) ...[
           const SizedBox(height: 22),
-          Text('Budgets this period', style: Theme.of(context).textTheme.titleMedium),
+          Text('Budgets this period',
+              style: Theme.of(context).textTheme.titleMedium),
           const SizedBox(height: 12),
           ...d.budgetSpendings.take(4).map((bs) {
-            final percent = bs.budget.limitAmount == 0 ? 0.0 : bs.spent / bs.budget.limitAmount * 100;
+            final percent = bs.budget.limitAmount == 0
+                ? 0.0
+                : bs.spent / bs.budget.limitAmount * 100;
             final exceeded = percent >= 100;
             return Padding(
               padding: const EdgeInsets.only(bottom: 10),
               child: AppCard(
                 padding: const EdgeInsets.all(14),
                 onTap: () async {
-                  await Navigator.of(context).push(MaterialPageRoute(builder: (_) => BudgetFormScreen(budget: bs.budget)));
+                  await Navigator.of(context).push(MaterialPageRoute(
+                      builder: (_) => BudgetFormScreen(budget: bs.budget)));
                   widget.onChanged();
                 },
                 child: Column(
                   children: [
                     Row(
                       children: [
-                        CategoryAvatar(name: bs.budget.categoryName, color: bs.budget.categoryColor, size: 36),
+                        CategoryAvatar(
+                            name: bs.budget.categoryName,
+                            color: bs.budget.categoryColor,
+                            size: 36),
                         const SizedBox(width: 10),
                         Expanded(
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Text(bs.budget.categoryName ?? 'Category', style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 13)),
-                              Text('${formatMoney(bs.spent, cur)} of ${formatMoney(bs.budget.limitAmount, cur)}', style: TextStyle(fontSize: 11.5, color: Theme.of(context).textTheme.bodySmall!.color)),
+                              Text(bs.budget.categoryName ?? 'Category',
+                                  style: const TextStyle(
+                                      fontWeight: FontWeight.w700,
+                                      fontSize: 13)),
+                              Text(
+                                  '${formatMoney(bs.spent, cur)} of ${formatMoney(bs.budget.limitAmount, cur)}',
+                                  style: TextStyle(
+                                      fontSize: 11.5,
+                                      color: Theme.of(context)
+                                          .textTheme
+                                          .bodySmall!
+                                          .color)),
                             ],
                           ),
                         ),
-                        Pill(exceeded ? 'Over' : '${percent.toStringAsFixed(0)}%', exceeded ? AppColors.danger : (percent > 80 ? AppColors.warning : AppColors.income)),
+                        Pill(
+                            exceeded
+                                ? 'Over'
+                                : '${percent.toStringAsFixed(0)}%',
+                            exceeded
+                                ? AppColors.danger
+                                : (percent > 80
+                                    ? AppColors.warning
+                                    : AppColors.income)),
                       ],
                     ),
                     const SizedBox(height: 10),
-                    ProgressBar(fraction: percent / 100, color: exceeded ? AppColors.danger : (percent > 80 ? AppColors.warning : AppColors.primary)),
+                    ProgressBar(
+                        fraction: percent / 100,
+                        color: exceeded
+                            ? AppColors.danger
+                            : (percent > 80
+                                ? AppColors.warning
+                                : AppColors.primary)),
                   ],
                 ),
               ),
@@ -416,14 +513,17 @@ class _DashboardBodyState extends State<_DashboardBody> {
         ],
         const SizedBox(height: 22),
         if (d.upcomingRepayments.isNotEmpty) ...[
-          Text('Loan repayments', style: Theme.of(context).textTheme.titleMedium),
+          Text('Loan repayments',
+              style: Theme.of(context).textTheme.titleMedium),
           const SizedBox(height: 12),
           ...d.upcomingRepayments.take(3).map((u) => Padding(
                 padding: const EdgeInsets.only(bottom: 10),
                 child: AppCard(
-                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
                   onTap: () async {
-                    await Navigator.of(context).push(MaterialPageRoute(builder: (_) => const LoansScreen()));
+                    await Navigator.of(context).push(
+                        MaterialPageRoute(builder: (_) => const LoansScreen()));
                     widget.onChanged();
                   },
                   child: Row(
@@ -435,23 +535,37 @@ class _DashboardBodyState extends State<_DashboardBody> {
                           color: AppColors.primary.withValues(alpha: 0.1),
                           borderRadius: BorderRadius.circular(12),
                         ),
-                        child: const Icon(Icons.request_quote_outlined, color: AppColors.primary, size: 22),
+                        child: const Icon(Icons.request_quote_outlined,
+                            color: AppColors.primary, size: 22),
                       ),
                       const SizedBox(width: 12),
                       Expanded(
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text(u.loanName, style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 13.5), maxLines: 1, overflow: TextOverflow.ellipsis),
+                            Text(u.loanName,
+                                style: const TextStyle(
+                                    fontWeight: FontWeight.w700,
+                                    fontSize: 13.5),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis),
                             Text(
                               'Due ${formatDateShort(u.payment.dueDate)} · on your salary day',
-                              style: TextStyle(fontSize: 11.5, color: Theme.of(context).textTheme.bodySmall!.color),
+                              style: TextStyle(
+                                  fontSize: 11.5,
+                                  color: Theme.of(context)
+                                      .textTheme
+                                      .bodySmall!
+                                      .color),
                             ),
                           ],
                         ),
                       ),
                       Flexible(
-                        child: Text(formatMoney(u.payment.amountDue, cur), style: const TextStyle(fontWeight: FontWeight.w800), maxLines: 1, overflow: TextOverflow.ellipsis),
+                        child: Text(formatMoney(u.payment.amountDue, cur),
+                            style: const TextStyle(fontWeight: FontWeight.w800),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis),
                       ),
                     ],
                   ),
@@ -461,15 +575,23 @@ class _DashboardBodyState extends State<_DashboardBody> {
         ],
         Row(
           children: [
-            Expanded(child: Text('Recent activity', style: Theme.of(context).textTheme.titleMedium)),
-            Text(months, style: TextStyle(fontSize: 12.5, fontWeight: FontWeight.w500, color: Theme.of(context).textTheme.bodySmall!.color)),
+            Expanded(
+                child: Text('Recent activity',
+                    style: Theme.of(context).textTheme.titleMedium)),
+            Text(months,
+                style: TextStyle(
+                    fontSize: 12.5,
+                    fontWeight: FontWeight.w500,
+                    color: Theme.of(context).textTheme.bodySmall!.color)),
           ],
         ),
         if (d.recent.isEmpty)
           AppCard(
             padding: const EdgeInsets.all(20),
             child: Center(
-              child: Text('No recent transactions yet.', style: TextStyle(color: Theme.of(context).textTheme.bodySmall!.color)),
+              child: Text('No recent transactions yet.',
+                  style: TextStyle(
+                      color: Theme.of(context).textTheme.bodySmall!.color)),
             ),
           )
         else
@@ -477,26 +599,49 @@ class _DashboardBodyState extends State<_DashboardBody> {
                 (e) => Padding(
                   padding: const EdgeInsets.only(bottom: 8),
                   child: AppCard(
-                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 12, vertical: 10),
                     onTap: () async {
-                      await Navigator.of(context).push(MaterialPageRoute(builder: (_) => ExpenseFormScreen(expense: e)));
+                      await Navigator.of(context).push(MaterialPageRoute(
+                          builder: (_) => ExpenseFormScreen(expense: e)));
                       widget.onChanged();
                     },
                     child: Row(
                       children: [
-                        CategoryAvatar(name: e.categoryName, color: e.categoryColor, size: 38),
+                        CategoryAvatar(
+                            name: e.categoryName,
+                            color: e.categoryColor,
+                            size: 38),
                         const SizedBox(width: 10),
                         Expanded(
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Text(e.description, style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 13.5), maxLines: 1, overflow: TextOverflow.ellipsis),
-                              Text(formatDate(e.expenseDate), style: TextStyle(fontSize: 11.5, color: Theme.of(context).textTheme.bodySmall!.color)),
+                              Text(e.description,
+                                  style: const TextStyle(
+                                      fontWeight: FontWeight.w600,
+                                      fontSize: 13.5),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis),
+                              Text(formatDate(e.expenseDate),
+                                  style: TextStyle(
+                                      fontSize: 11.5,
+                                      color: Theme.of(context)
+                                          .textTheme
+                                          .bodySmall!
+                                          .color)),
                             ],
                           ),
                         ),
                         Flexible(
-                          child: Text('-${formatMoney(e.amount, e.currencyCode.isEmpty ? cur : e.currencyCode)}', style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 13, color: AppColors.expense), maxLines: 1, overflow: TextOverflow.ellipsis),
+                          child: Text(
+                              '-${formatMoney(e.amount, e.currencyCode.isEmpty ? cur : e.currencyCode)}',
+                              style: const TextStyle(
+                                  fontWeight: FontWeight.w800,
+                                  fontSize: 13,
+                                  color: AppColors.expense),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis),
                         ),
                       ],
                     ),
@@ -513,7 +658,8 @@ class _DashboardBodyState extends State<_DashboardBody> {
                   child: AppCard(
                     padding: const EdgeInsets.all(14),
                     onTap: () async {
-                      await Navigator.of(context).push(MaterialPageRoute(builder: (_) => GoalFormScreen(goal: g)));
+                      await Navigator.of(context).push(MaterialPageRoute(
+                          builder: (_) => GoalFormScreen(goal: g)));
                       widget.onChanged();
                     },
                     child: Column(
@@ -522,16 +668,29 @@ class _DashboardBodyState extends State<_DashboardBody> {
                         Row(
                           children: [
                             Expanded(
-                              child: Text(g.title, style: const TextStyle(fontWeight: FontWeight.w700)),
+                              child: Text(g.title,
+                                  style: const TextStyle(
+                                      fontWeight: FontWeight.w700)),
                             ),
-                            Text('${g.progressPercentage.toStringAsFixed(0)}%', style: const TextStyle(fontWeight: FontWeight.w800, color: AppColors.primary)),
+                            Text('${g.progressPercentage.toStringAsFixed(0)}%',
+                                style: const TextStyle(
+                                    fontWeight: FontWeight.w800,
+                                    color: AppColors.primary)),
                           ],
                         ),
                         const SizedBox(height: 10),
-                        ProgressBar(fraction: g.progressPercentage / 100, color: AppColors.primary),
+                        ProgressBar(
+                            fraction: g.progressPercentage / 100,
+                            color: AppColors.primary),
                         const SizedBox(height: 8),
-                        Text('${formatMoney(g.currentAmount, cur)} of ${formatMoney(g.targetAmount, cur)}',
-                            style: TextStyle(fontSize: 12, color: Theme.of(context).textTheme.bodySmall!.color)),
+                        Text(
+                            '${formatMoney(g.currentAmount, cur)} of ${formatMoney(g.targetAmount, cur)}',
+                            style: TextStyle(
+                                fontSize: 12,
+                                color: Theme.of(context)
+                                    .textTheme
+                                    .bodySmall!
+                                    .color)),
                       ],
                     ),
                   ),
@@ -545,7 +704,8 @@ class _DashboardBodyState extends State<_DashboardBody> {
               child: _QuickLinkCard(
                 icon: Icons.assessment_outlined,
                 label: 'Net Worth',
-                onTap: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const NetWorthScreen())),
+                onTap: () => Navigator.of(context).push(
+                    MaterialPageRoute(builder: (_) => const NetWorthScreen())),
               ),
             ),
             const SizedBox(width: 12),
@@ -553,7 +713,8 @@ class _DashboardBodyState extends State<_DashboardBody> {
               child: _QuickLinkCard(
                 icon: Icons.request_quote_outlined,
                 label: 'Loans',
-                onTap: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const LoansScreen())),
+                onTap: () => Navigator.of(context).push(
+                    MaterialPageRoute(builder: (_) => const LoansScreen())),
               ),
             ),
           ],
@@ -565,48 +726,65 @@ class _DashboardBodyState extends State<_DashboardBody> {
               child: _QuickLinkCard(
                 icon: Icons.insights_outlined,
                 label: 'Insights',
-                onTap: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const InsightsScreen())),
+                onTap: () => Navigator.of(context).push(
+                    MaterialPageRoute(builder: (_) => const InsightsScreen())),
               ),
             ),
             const SizedBox(width: 12),
-Expanded(
-                  child: _QuickLinkCard(
-                    icon: Icons.receipt_long_outlined,
-                    label: 'Reports',
-                    onTap: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const ReportsScreen())),
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 12),
-            Row(
-              children: [
-                Expanded(
-                  child: _QuickLinkCard(
-                    icon: Icons.smart_toy_outlined,
-                    label: 'Assistant',
-                    onTap: () => Navigator.of(context).push(MaterialPageRoute(
-                      settings: const RouteSettings(name: AssistantScreen.routeName),
-                      builder: (_) => const AssistantScreen(),
-                    )),
-                  ),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: _QuickLinkCard(
-                    icon: Icons.document_scanner_outlined,
-                    label: 'Scan receipt',
-                    onTap: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const ScanReceiptScreen())),
-                  ),
-                ),
-              ],
+            Expanded(
+              child: _QuickLinkCard(
+                icon: Icons.receipt_long_outlined,
+                label: 'Reports',
+                onTap: () => Navigator.of(context).push(
+                    MaterialPageRoute(builder: (_) => const ReportsScreen())),
+              ),
             ),
           ],
-      );
-    }
+        ),
+        const SizedBox(height: 12),
+        Row(
+          children: [
+            Expanded(
+              child: _QuickLinkCard(
+                icon: Icons.forum_outlined,
+                label: 'Assistant',
+                onTap: () => Navigator.of(context).push(MaterialPageRoute(
+                  settings:
+                      const RouteSettings(name: AssistantScreen.routeName),
+                  builder: (_) => const AssistantScreen(),
+                )),
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: _QuickLinkCard(
+                icon: Icons.document_scanner_outlined,
+                label: 'Scan receipt',
+                onTap: () => Navigator.of(context).push(MaterialPageRoute(
+                    builder: (_) => const ScanReceiptScreen())),
+              ),
+            ),
+          ],
+        ),
+      ],
+    );
+  }
 
   String get _monthName {
-    const months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+    const months = [
+      'January',
+      'February',
+      'March',
+      'April',
+      'May',
+      'June',
+      'July',
+      'August',
+      'September',
+      'October',
+      'November',
+      'December'
+    ];
     return months[DateTime.now().month - 1];
   }
 }
@@ -619,19 +797,8 @@ class _BalanceHero extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final positive = data.netWorth >= 0;
-    return Container(
-      padding: const EdgeInsets.all(22),
-      decoration: BoxDecoration(
-        gradient: const LinearGradient(colors: AppColors.heroGradient),
-        borderRadius: BorderRadius.circular(26),
-        boxShadow: [
-          BoxShadow(
-            color: AppColors.primary.withValues(alpha: 0.35),
-            blurRadius: 24,
-            offset: const Offset(0, 10),
-          ),
-        ],
-      ),
+    return BrandHeroCard(
+      tone: HeroCardTone.brand,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -641,11 +808,17 @@ class _BalanceHero extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text('Total balance', style: TextStyle(color: Colors.white.withValues(alpha: 0.8), fontSize: 13)),
+                    Text('Total balance',
+                        style: TextStyle(
+                            color: AppColors.onHeroMuted, fontSize: 13)),
                     const SizedBox(height: 4),
                     Text(
                       '${positive ? '' : '-'}${currencySymbol(currency)}${data.netWorth.abs().toStringAsFixed(2)}',
-                      style: const TextStyle(color: Colors.white, fontSize: 30, fontWeight: FontWeight.w800, letterSpacing: -0.5),
+                      style: const TextStyle(
+                          color: AppColors.onHero,
+                          fontSize: 30,
+                          fontWeight: FontWeight.w800,
+                          letterSpacing: -0.5),
                     ),
                   ],
                 ),
@@ -654,9 +827,9 @@ class _BalanceHero extends StatelessWidget {
                 padding: const EdgeInsets.all(10),
                 decoration: BoxDecoration(
                   color: Colors.white.withValues(alpha: 0.18),
-                  borderRadius: BorderRadius.circular(14),
+                  borderRadius: BorderRadius.circular(AppTheme.radiusMd),
                 ),
-                child: const Icon(Icons.wallet, color: Colors.white),
+                child: const Icon(Icons.wallet, color: AppColors.onHero),
               ),
             ],
           ),
@@ -664,11 +837,22 @@ class _BalanceHero extends StatelessWidget {
           Row(
             children: [
               Expanded(
-                child: _HeroStat(label: 'Income (all time)', amount: data.totalIncomeAll, currency: currency, color: const Color(0xFF7CFFD8)),
+                child: _HeroStat(
+                    label: 'Income (all time)',
+                    amount: data.totalIncomeAll,
+                    currency: currency,
+                    color: const Color(0xFF7CFFD8)),
               ),
-              Container(width: 1, height: 34, color: Colors.white.withValues(alpha: 0.25)),
+              Container(
+                  width: 1,
+                  height: 34,
+                  color: Colors.white.withValues(alpha: 0.25)),
               Expanded(
-                child: _HeroStat(label: 'Expenses (all time)', amount: data.totalExpenseAll, currency: currency, color: const Color(0xFFFFB7C5)),
+                child: _HeroStat(
+                    label: 'Expenses (all time)',
+                    amount: data.totalExpenseAll,
+                    currency: currency,
+                    color: const Color(0xFFFFB7C5)),
               ),
             ],
           ),
@@ -683,19 +867,26 @@ class _HeroStat extends StatelessWidget {
   final double amount;
   final String currency;
   final Color color;
-  const _HeroStat({required this.label, required this.amount, required this.currency, required this.color});
+  const _HeroStat(
+      {required this.label,
+      required this.amount,
+      required this.currency,
+      required this.color});
 
   @override
   Widget build(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
-        Text(label, textAlign: TextAlign.center, style: TextStyle(color: Colors.white.withValues(alpha: 0.75), fontSize: 11)),
+        Text(label,
+            textAlign: TextAlign.center,
+            style: TextStyle(color: AppColors.onHeroMuted, fontSize: 11)),
         const SizedBox(height: 4),
         Text(
           formatMoney(amount, currency),
           textAlign: TextAlign.center,
-          style: TextStyle(color: color, fontWeight: FontWeight.w800, fontSize: 14),
+          style: TextStyle(
+              color: color, fontWeight: FontWeight.w800, fontSize: 14),
         ),
       ],
     );
@@ -711,9 +902,14 @@ class _LegendDot extends StatelessWidget {
   Widget build(BuildContext context) {
     return Row(
       children: [
-        Container(width: 10, height: 10, decoration: BoxDecoration(color: color, shape: BoxShape.circle)),
+        Container(
+            width: 10,
+            height: 10,
+            decoration: BoxDecoration(color: color, shape: BoxShape.circle)),
         const SizedBox(width: 6),
-        Text(label, style: const TextStyle(fontSize: 12.5, fontWeight: FontWeight.w600)),
+        Text(label,
+            style:
+                const TextStyle(fontSize: 12.5, fontWeight: FontWeight.w600)),
       ],
     );
   }
@@ -726,7 +922,8 @@ class _MonthlyTrendChart extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final maxVal = points.fold<double>(0, (m, p) => [m, p.income, p.expense].reduce((a, b) => a > b ? a : b));
+    final maxVal = points.fold<double>(
+        0, (m, p) => [m, p.income, p.expense].reduce((a, b) => a > b ? a : b));
     final safeMax = maxVal <= 0 ? 1.0 : maxVal;
     return BarChart(
       BarChartData(
@@ -735,14 +932,18 @@ class _MonthlyTrendChart extends StatelessWidget {
           drawVerticalLine: false,
           horizontalInterval: safeMax / 3,
           getDrawingHorizontalLine: (v) => FlLine(
-            color: Theme.of(context).brightness == Brightness.dark ? const Color(0xFF262C38) : const Color(0xFFF0F2F7),
+            color: Theme.of(context).brightness == Brightness.dark
+                ? const Color(0xFF262C38)
+                : const Color(0xFFF0F2F7),
             strokeWidth: 1,
           ),
         ),
         borderData: FlBorderData(show: false),
         titlesData: FlTitlesData(
-          topTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
-          rightTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+          topTitles:
+              const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+          rightTitles:
+              const AxisTitles(sideTitles: SideTitles(showTitles: false)),
           leftTitles: AxisTitles(
             sideTitles: SideTitles(
               showTitles: true,
@@ -751,7 +952,9 @@ class _MonthlyTrendChart extends StatelessWidget {
                 if (value <= 0) return const SizedBox();
                 return Text(
                   _compactNumber(value),
-                  style: TextStyle(fontSize: 9.5, color: Theme.of(context).textTheme.bodySmall!.color),
+                  style: TextStyle(
+                      fontSize: 9.5,
+                      color: Theme.of(context).textTheme.bodySmall!.color),
                 );
               },
             ),
@@ -765,7 +968,11 @@ class _MonthlyTrendChart extends StatelessWidget {
                 if (i % 2 == 0) {
                   return Padding(
                     padding: const EdgeInsets.only(top: 6),
-                    child: Text(points[i].label, style: TextStyle(fontSize: 10, color: Theme.of(context).textTheme.bodySmall!.color)),
+                    child: Text(points[i].label,
+                        style: TextStyle(
+                            fontSize: 10,
+                            color:
+                                Theme.of(context).textTheme.bodySmall!.color)),
                   );
                 }
                 return const SizedBox();
@@ -776,12 +983,20 @@ class _MonthlyTrendChart extends StatelessWidget {
         maxY: safeMax * 1.1,
         barTouchData: BarTouchData(
           touchTooltipData: BarTouchTooltipData(
-            getTooltipColor: (_) => Theme.of(context).brightness == Brightness.dark ? AppColors.surfaceDark2 : Colors.white,
+            getTooltipColor: (_) =>
+                Theme.of(context).brightness == Brightness.dark
+                    ? AppColors.surfaceDark2
+                    : Colors.white,
             getTooltipItem: (group, groupIndex, rod, rodIndex) {
               final p = points[group.x];
               return BarTooltipItem(
                 '${rodIndex == 0 ? 'Income' : 'Expense'}\n${p.label} · ${formatMoney(rod.toY, currency)}',
-                TextStyle(color: Theme.of(context).brightness == Brightness.dark ? Colors.white : Colors.black, fontSize: 12, fontWeight: FontWeight.w700),
+                TextStyle(
+                    color: Theme.of(context).brightness == Brightness.dark
+                        ? Colors.white
+                        : Colors.black,
+                    fontSize: 12,
+                    fontWeight: FontWeight.w700),
               );
             },
           ),
@@ -791,8 +1006,16 @@ class _MonthlyTrendChart extends StatelessWidget {
             x: i,
             barsSpace: 3,
             barRods: [
-              BarChartRodData(toY: points[i].income, color: AppColors.income, width: 7, borderRadius: const BorderRadius.all(Radius.circular(3))),
-              BarChartRodData(toY: points[i].expense, color: AppColors.expense, width: 7, borderRadius: const BorderRadius.all(Radius.circular(3))),
+              BarChartRodData(
+                  toY: points[i].income,
+                  color: AppColors.income,
+                  width: 7,
+                  borderRadius: const BorderRadius.all(Radius.circular(3))),
+              BarChartRodData(
+                  toY: points[i].expense,
+                  color: AppColors.expense,
+                  width: 7,
+                  borderRadius: const BorderRadius.all(Radius.circular(3))),
             ],
           );
         }),
@@ -836,7 +1059,8 @@ class _QuickLinkCard extends StatelessWidget {
   final IconData icon;
   final String label;
   final VoidCallback onTap;
-  const _QuickLinkCard({required this.icon, required this.label, required this.onTap});
+  const _QuickLinkCard(
+      {required this.icon, required this.label, required this.onTap});
 
   @override
   Widget build(BuildContext context) {

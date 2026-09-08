@@ -39,12 +39,15 @@ class _ScanReceiptScreenState extends State<ScanReceiptScreen> {
 
   Future<void> _pickImage(ImageSource source) async {
     try {
-      final file = await _picker.pickImage(source: source, maxWidth: 2000, imageQuality: 85);
+      final file = await _picker.pickImage(
+          source: source, maxWidth: 2000, imageQuality: 85);
       if (file == null) return;
       final dir = await getApplicationDocumentsDirectory();
       final receiptsDir = Directory(p.join(dir.path, 'receipts'));
-      if (!await receiptsDir.exists()) await receiptsDir.create(recursive: true);
-      final dest = p.join(receiptsDir.path, '${DateTime.now().millisecondsSinceEpoch}_${p.basename(file.path)}');
+      if (!await receiptsDir.exists())
+        await receiptsDir.create(recursive: true);
+      final dest = p.join(receiptsDir.path,
+          '${DateTime.now().millisecondsSinceEpoch}_${p.basename(file.path)}');
       await File(file.path).copy(dest);
       if (!mounted) return;
       setState(() {
@@ -104,7 +107,9 @@ class _ScanReceiptScreenState extends State<ScanReceiptScreen> {
           initialPaymentMethod: parsed.paymentMethodCode,
           initialNotes: notes,
           initialReceiptPath: _imagePath,
-          receiptOcrText: _textController.text.trim().isEmpty ? null : _textController.text.trim(),
+          receiptOcrText: _textController.text.trim().isEmpty
+              ? null
+              : _textController.text.trim(),
         ),
       ),
     );
@@ -121,13 +126,17 @@ class _ScanReceiptScreenState extends State<ScanReceiptScreen> {
         fileName: p.basename(path),
         fileSize: size,
         mimeType: 'image/jpeg',
-        ocrText: _textController.text.trim().isEmpty ? null : _textController.text.trim(),
+        ocrText: _textController.text.trim().isEmpty
+            ? null
+            : _textController.text.trim(),
       );
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Receipt saved')));
+      ScaffoldMessenger.of(context)
+          .showSnackBar(const SnackBar(content: Text('Receipt saved')));
     } catch (e) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Could not save receipt: $e')));
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text('Could not save receipt: $e')));
     }
   }
 
@@ -192,29 +201,41 @@ class _ScanReceiptScreenState extends State<ScanReceiptScreen> {
                 color: Theme.of(context).colorScheme.surface,
                 borderRadius: BorderRadius.circular(16),
                 border: Border.all(
-                  color: Theme.of(context).brightness == Brightness.dark ? const Color(0xFF262C38) : const Color(0xFFE8EAF1),
+                  color: Theme.of(context).brightness == Brightness.dark
+                      ? const Color(0xFF262C38)
+                      : const Color(0xFFE8EAF1),
                 ),
               ),
               child: Row(
                 children: [
                   ClipRRect(
                     borderRadius: BorderRadius.circular(10),
-                    child: Image.file(File(_imagePath!), width: 72, height: 72, fit: BoxFit.cover),
+                    child: Image.file(File(_imagePath!),
+                        width: 72, height: 72, fit: BoxFit.cover),
                   ),
                   const SizedBox(width: 12),
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(p.basename(_imagePath!), maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 13)),
+                        Text(p.basename(_imagePath!),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: const TextStyle(
+                                fontWeight: FontWeight.w600, fontSize: 13)),
                         if (_scanning)
                           const Padding(
                             padding: EdgeInsets.only(top: 6),
                             child: Row(
                               children: [
-                                SizedBox(width: 14, height: 14, child: CircularProgressIndicator(strokeWidth: 2)),
+                                SizedBox(
+                                    width: 14,
+                                    height: 14,
+                                    child: CircularProgressIndicator(
+                                        strokeWidth: 2)),
                                 SizedBox(width: 8),
-                                Text('Reading text…', style: TextStyle(fontSize: 12)),
+                                Text('Reading text…',
+                                    style: TextStyle(fontSize: 12)),
                               ],
                             ),
                           ),
@@ -240,7 +261,8 @@ class _ScanReceiptScreenState extends State<ScanReceiptScreen> {
             maxLines: 10,
             onChanged: (_) => _parsed = null,
             decoration: const InputDecoration(
-              hintText: 'Receipt text appears here. You can edit it or paste the receipt text manually.\n\nTip: copy from "TOTAL 125.00" down.',
+              hintText:
+                  'Receipt text appears here. You can edit it or paste the receipt text manually.\n\nTip: copy from "TOTAL 125.00" down.',
               alignLabelWithHint: true,
             ),
           ),
@@ -248,7 +270,11 @@ class _ScanReceiptScreenState extends State<ScanReceiptScreen> {
           FilledButton.icon(
             onPressed: (_extracting || _scanning) ? null : _extract,
             icon: _extracting
-                ? const SizedBox(width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 2.2, color: Colors.white))
+                ? const SizedBox(
+                    width: 18,
+                    height: 18,
+                    child: CircularProgressIndicator(
+                        strokeWidth: 2.2, color: Colors.white))
                 : const Icon(Icons.auto_fix_high_outlined),
             label: const Text('Extract details'),
           ),
@@ -262,24 +288,30 @@ class _ScanReceiptScreenState extends State<ScanReceiptScreen> {
   Widget _buildResultCard(BuildContext context) {
     final r = _parsed!;
     final canAdd = r.total != null;
-    return Container(
+    return BrandHeroCard(
       padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        gradient: const LinearGradient(colors: AppColors.brandGradient),
-        borderRadius: BorderRadius.circular(20),
-      ),
+      radius: AppTheme.radiusLg,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('Extracted details', style: TextStyle(color: Colors.white.withValues(alpha: 0.8), fontSize: 12.5, fontWeight: FontWeight.w600)),
+          Text('Extracted details',
+              style: TextStyle(
+                  color: AppColors.onHeroMuted,
+                  fontSize: 12.5,
+                  fontWeight: FontWeight.w600)),
           const SizedBox(height: 8),
           Row(
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
               Flexible(
                 child: Text(
-                  r.total == null ? '—' : '${currencySymbol('PHP')}${r.total!.toStringAsFixed(2)}',
-                  style: const TextStyle(color: Colors.white, fontSize: 30, fontWeight: FontWeight.w800),
+                  r.total == null
+                      ? '—'
+                      : '${currencySymbol('PHP')}${r.total!.toStringAsFixed(2)}',
+                  style: const TextStyle(
+                      color: AppColors.onHero,
+                      fontSize: 30,
+                      fontWeight: FontWeight.w800),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),
@@ -290,7 +322,10 @@ class _ScanReceiptScreenState extends State<ScanReceiptScreen> {
                   padding: const EdgeInsets.only(bottom: 6),
                   child: Text(
                     r.merchant ?? 'Merchant not found',
-                    style: TextStyle(color: Colors.white.withValues(alpha: 0.75), fontSize: 13.5, fontWeight: FontWeight.w600),
+                    style: TextStyle(
+                        color: AppColors.onHeroMuted,
+                        fontSize: 13.5,
+                        fontWeight: FontWeight.w600),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
@@ -304,19 +339,24 @@ class _ScanReceiptScreenState extends State<ScanReceiptScreen> {
             runSpacing: 8,
             children: [
               if (r.date != null)
-                _InfoChip(icon: Icons.calendar_today_outlined, text: formatDateShort(_formatDate(r.date!))),
+                _InfoChip(
+                    icon: Icons.calendar_today_outlined,
+                    text: formatDateShort(_formatDate(r.date!))),
               if (r.paymentMethodCode != null)
                 Chip(
-                  avatar: PaymentMethodBadge(code: r.paymentMethodCode!, size: 18),
+                  avatar:
+                      PaymentMethodBadge(code: r.paymentMethodCode!, size: 18),
                   label: Text(paymentMethodLabel(r.paymentMethodCode!)),
                   labelStyle: const TextStyle(fontSize: 12),
                   side: BorderSide.none,
                   backgroundColor: Colors.white.withValues(alpha: 0.18),
                   labelPadding: const EdgeInsets.symmetric(horizontal: 6),
-                  padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                 ),
               if (r.items.isNotEmpty)
-                _InfoChip(icon: Icons.list_alt, text: '${r.items.length} line items'),
+                _InfoChip(
+                    icon: Icons.list_alt, text: '${r.items.length} line items'),
             ],
           ),
           if (r.items.isNotEmpty) ...[
@@ -325,11 +365,13 @@ class _ScanReceiptScreenState extends State<ScanReceiptScreen> {
               Padding(
                 padding: const EdgeInsets.only(bottom: 3),
                 child: Text(
-                '• $item',
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: TextStyle(color: Colors.white.withValues(alpha: 0.85), fontSize: 12.5),
-              ),
+                  '• $item',
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                      color: Colors.white.withValues(alpha: 0.85),
+                      fontSize: 12.5),
+                ),
               ),
           ],
           const SizedBox(height: 14),
@@ -339,7 +381,10 @@ class _ScanReceiptScreenState extends State<ScanReceiptScreen> {
                 Expanded(
                   child: OutlinedButton(
                     onPressed: _saveReceiptOnly,
-                    style: OutlinedButton.styleFrom(foregroundColor: Colors.white, side: BorderSide(color: Colors.white.withValues(alpha: 0.5))),
+                    style: OutlinedButton.styleFrom(
+                        foregroundColor: Colors.white,
+                        side: BorderSide(
+                            color: Colors.white.withValues(alpha: 0.5))),
                     child: const Text('Save receipt only'),
                   ),
                 ),
@@ -349,7 +394,9 @@ class _ScanReceiptScreenState extends State<ScanReceiptScreen> {
                 flex: 2,
                 child: FilledButton.icon(
                   onPressed: canAdd ? _addAsExpense : null,
-                  style: FilledButton.styleFrom(backgroundColor: Colors.white, foregroundColor: AppColors.primary),
+                  style: FilledButton.styleFrom(
+                      backgroundColor: Colors.white,
+                      foregroundColor: AppColors.primary),
                   icon: const Icon(Icons.add_card),
                   label: Text(canAdd ? 'Add as expense' : 'No total found'),
                 ),

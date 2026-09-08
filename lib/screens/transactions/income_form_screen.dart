@@ -46,7 +46,8 @@ class _IncomeFormScreenState extends State<IncomeFormScreen> {
   Future<void> _load() async {
     final user = await AppRepository.instance.getUser();
     if (!mounted) return;
-    setState(() => _currency = widget.income?.currencyCode ?? user.preferredCurrency);
+    setState(() =>
+        _currency = widget.income?.currencyCode ?? user.preferredCurrency);
   }
 
   @override
@@ -91,10 +92,15 @@ class _IncomeFormScreenState extends State<IncomeFormScreen> {
         context: context,
         builder: (ctx) => AlertDialog(
           title: const Text('Duplicate income'),
-          content: Text('${e.message}\n\nTap "Save anyway" to confirm this duplicate.'),
+          content: Text(
+              '${e.message}\n\nTap "Save anyway" to confirm this duplicate.'),
           actions: [
-            TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Cancel')),
-            FilledButton(onPressed: () => Navigator.pop(ctx, true), child: const Text('Save anyway')),
+            TextButton(
+                onPressed: () => Navigator.pop(ctx, false),
+                child: const Text('Cancel')),
+            FilledButton(
+                onPressed: () => Navigator.pop(ctx, true),
+                child: const Text('Save anyway')),
           ],
         ),
       );
@@ -116,7 +122,8 @@ class _IncomeFormScreenState extends State<IncomeFormScreen> {
     } catch (e) {
       if (!mounted) return;
       setState(() => _saving = false);
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Could not save: $e')));
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text('Could not save: $e')));
     }
   }
 
@@ -133,30 +140,38 @@ class _IncomeFormScreenState extends State<IncomeFormScreen> {
         child: ListView(
           padding: const EdgeInsets.fromLTRB(20, 8, 20, 24),
           children: [
-            Container(
-              padding: const EdgeInsets.all(20),
-              decoration: const BoxDecoration(
-                gradient: LinearGradient(colors: [Color(0xFF10B981), Color(0xFF059669)]),
-                borderRadius: BorderRadius.all(Radius.circular(22)),
-              ),
+            BrandHeroCard(
+              tone: HeroCardTone.income,
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text('Amount', style: TextStyle(color: Colors.white.withValues(alpha: 0.8), fontSize: 13)),
+                  Text('Amount',
+                      style: TextStyle(
+                          color: AppColors.onHeroMuted, fontSize: 13)),
                   const SizedBox(height: 6),
                   Row(
                     crossAxisAlignment: CrossAxisAlignment.end,
                     children: [
-                      Text(currencySymbol(_currency), style: const TextStyle(color: Colors.white, fontSize: 22, fontWeight: FontWeight.w800)),
+                      Text(currencySymbol(_currency),
+                          style: const TextStyle(
+                              color: AppColors.onHero,
+                              fontSize: 22,
+                              fontWeight: FontWeight.w800)),
                       const SizedBox(width: 6),
                       Expanded(
                         child: TextField(
                           controller: _amountController,
-                          keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                          style: const TextStyle(color: Colors.white, fontSize: 32, fontWeight: FontWeight.w800),
-                          decoration: const InputDecoration(
+                          keyboardType: const TextInputType.numberWithOptions(
+                              decimal: true),
+                          style: const TextStyle(
+                              color: AppColors.onHero,
+                              fontSize: 32,
+                              fontWeight: FontWeight.w800),
+                          decoration: InputDecoration(
                             hintText: '0.00',
-                            hintStyle: TextStyle(color: Color(0x88FFFFFF)),
+                            hintStyle: TextStyle(
+                                color:
+                                    AppColors.onHero.withValues(alpha: 0.55)),
                             border: InputBorder.none,
                             enabledBorder: InputBorder.none,
                             focusedBorder: InputBorder.none,
@@ -176,7 +191,8 @@ class _IncomeFormScreenState extends State<IncomeFormScreen> {
                 labelText: 'Source',
                 prefixIcon: Icon(Icons.work_outline),
               ),
-              validator: (v) => (v == null || v.trim().isEmpty) ? 'Enter a source' : null,
+              validator: (v) =>
+                  (v == null || v.trim().isEmpty) ? 'Enter a source' : null,
             ),
             const SizedBox(height: 12),
             Wrap(
@@ -187,12 +203,14 @@ class _IncomeFormScreenState extends State<IncomeFormScreen> {
                   ChoiceChip(
                     label: Text(s),
                     selected: _sourceController.text.trim() == s,
-                    onSelected: (_) => setState(() => _sourceController.text = s),
+                    onSelected: (_) =>
+                        setState(() => _sourceController.text = s),
                   ),
               ],
             ),
             const SizedBox(height: 14),
-            Text('Date & Payment', style: Theme.of(context).textTheme.titleMedium),
+            Text('Date & Payment',
+                style: Theme.of(context).textTheme.titleMedium),
             const SizedBox(height: 10),
             Row(
               children: [
@@ -201,7 +219,8 @@ class _IncomeFormScreenState extends State<IncomeFormScreen> {
                     onTap: _pickDate,
                     borderRadius: BorderRadius.circular(14),
                     child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 15),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 16, vertical: 15),
                       decoration: BoxDecoration(
                         color: Theme.of(context).brightness == Brightness.dark
                             ? AppColors.surfaceDark2
@@ -210,9 +229,14 @@ class _IncomeFormScreenState extends State<IncomeFormScreen> {
                       ),
                       child: Row(
                         children: [
-                          Icon(Icons.calendar_today_outlined, size: 20, color: Theme.of(context).textTheme.bodySmall!.color),
+                          Icon(Icons.calendar_today_outlined,
+                              size: 20,
+                              color:
+                                  Theme.of(context).textTheme.bodySmall!.color),
                           const SizedBox(width: 10),
-                          Text(formatDateShort(_dateStr()), style: const TextStyle(fontWeight: FontWeight.w500)),
+                          Text(formatDateShort(_dateStr()),
+                              style:
+                                  const TextStyle(fontWeight: FontWeight.w500)),
                         ],
                       ),
                     ),
@@ -222,7 +246,8 @@ class _IncomeFormScreenState extends State<IncomeFormScreen> {
                 Expanded(
                   child: DropdownButtonFormField<String>(
                     value: _paymentMethod,
-                    decoration: const InputDecoration(prefixIcon: Icon(Icons.wallet_outlined)),
+                    decoration: const InputDecoration(
+                        prefixIcon: Icon(Icons.wallet_outlined)),
                     items: AppStrings.incomePaymentMethods
                         .map((m) => DropdownMenuItem<String>(
                               value: m,
@@ -231,13 +256,16 @@ class _IncomeFormScreenState extends State<IncomeFormScreen> {
                                   PaymentMethodBadge(code: m, size: 22),
                                   const SizedBox(width: 8),
                                   Flexible(
-                                    child: Text(paymentMethodLabel(m), maxLines: 1, overflow: TextOverflow.ellipsis),
+                                    child: Text(paymentMethodLabel(m),
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis),
                                   ),
                                 ],
                               ),
                             ))
                         .toList(),
-                    onChanged: (v) => setState(() => _paymentMethod = v ?? 'bank_transfer'),
+                    onChanged: (v) =>
+                        setState(() => _paymentMethod = v ?? 'bank_transfer'),
                   ),
                 ),
               ],
@@ -246,14 +274,21 @@ class _IncomeFormScreenState extends State<IncomeFormScreen> {
             TextField(
               controller: _notesController,
               maxLines: 3,
-              decoration: const InputDecoration(hintText: 'Notes (optional)', prefixIcon: Icon(Icons.sticky_note_2_outlined)),
+              decoration: const InputDecoration(
+                  hintText: 'Notes (optional)',
+                  prefixIcon: Icon(Icons.sticky_note_2_outlined)),
             ),
             const SizedBox(height: 20),
             ElevatedButton(
               onPressed: _saving ? null : _save,
-              style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF10B981)),
+              style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFF10B981)),
               child: _saving
-                  ? const SizedBox(width: 22, height: 22, child: CircularProgressIndicator(strokeWidth: 2.4, color: Colors.white))
+                  ? const SizedBox(
+                      width: 22,
+                      height: 22,
+                      child: CircularProgressIndicator(
+                          strokeWidth: 2.4, color: Colors.white))
                   : Text(_isEdit ? 'Save Changes' : 'Save Income'),
             ),
           ],

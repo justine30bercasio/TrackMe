@@ -114,13 +114,7 @@ class _FallbackSplash extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      decoration: const BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: AppColors.heroGradient,
-        ),
-      ),
+      color: AppColors.primary,
       child: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -131,15 +125,17 @@ class _FallbackSplash extends StatelessWidget {
               decoration: BoxDecoration(
                 color: Colors.white.withValues(alpha: 0.18),
                 borderRadius: BorderRadius.circular(28),
-                border: Border.all(color: Colors.white.withValues(alpha: 0.35), width: 1.5),
+                border: Border.all(
+                    color: Colors.white.withValues(alpha: 0.35), width: 1.5),
               ),
-              child: const Icon(Icons.savings_outlined, size: 52, color: Colors.white),
+              child: const Icon(Icons.savings_outlined,
+                  size: 52, color: AppColors.onHero),
             ),
             const SizedBox(height: 28),
             const Text(
               'TrackMe',
               style: TextStyle(
-                color: Colors.white,
+                color: AppColors.onHero,
                 fontSize: 28,
                 fontWeight: FontWeight.w800,
                 letterSpacing: -0.4,
@@ -148,7 +144,9 @@ class _FallbackSplash extends StatelessWidget {
             const SizedBox(height: 8),
             Text(
               'Your money, finally under control.',
-              style: TextStyle(color: Colors.white.withValues(alpha: 0.85), fontSize: 14),
+              style: TextStyle(
+                  color: AppColors.onHero.withValues(alpha: 0.85),
+                  fontSize: 14),
             ),
             const SizedBox(height: 48),
             SizedBox(
@@ -156,7 +154,7 @@ class _FallbackSplash extends StatelessWidget {
               height: 28,
               child: CircularProgressIndicator(
                 strokeWidth: 2.6,
-                color: Colors.white.withValues(alpha: 0.9),
+                color: AppColors.onHero.withValues(alpha: 0.9),
               ),
             ),
           ],

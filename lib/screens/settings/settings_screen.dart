@@ -34,7 +34,8 @@ class SettingsScreen extends StatelessWidget {
             name: user.name.isEmpty ? 'Set up your profile' : user.name,
             currency: user.preferredCurrency,
             flag: user.flagEmoji,
-            onTap: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const ProfileScreen())),
+            onTap: () => Navigator.of(context)
+                .push(MaterialPageRoute(builder: (_) => const ProfileScreen())),
           ),
           const SizedBox(height: 20),
           _SectionTileGroup(
@@ -52,13 +53,15 @@ class SettingsScreen extends StatelessWidget {
                 icon: Icons.currency_exchange,
                 title: 'Currencies',
                 subtitle: 'Manage currencies and exchange rates',
-                onTap: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const CurrenciesScreen())),
+                onTap: () => Navigator.of(context).push(MaterialPageRoute(
+                    builder: (_) => const CurrenciesScreen())),
               ),
               _SettingsTile(
                 icon: Icons.person_outline,
                 title: 'Profile',
                 subtitle: 'Name, country, language, reminders',
-                onTap: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const ProfileScreen())),
+                onTap: () => Navigator.of(context).push(
+                    MaterialPageRoute(builder: (_) => const ProfileScreen())),
               ),
             ],
           ),
@@ -67,11 +70,12 @@ class SettingsScreen extends StatelessWidget {
             title: 'Manage',
             children: [
               _SettingsTile(
-                icon: Icons.smart_toy_outlined,
+                icon: Icons.forum_outlined,
                 title: 'TrackMe Assistant',
                 subtitle: 'Chat, and it auto-logs your expenses & income',
                 onTap: () => Navigator.of(context).push(MaterialPageRoute(
-                  settings: const RouteSettings(name: AssistantScreen.routeName),
+                  settings:
+                      const RouteSettings(name: AssistantScreen.routeName),
                   builder: (_) => const AssistantScreen(),
                 )),
               ),
@@ -79,37 +83,43 @@ class SettingsScreen extends StatelessWidget {
                 icon: Icons.document_scanner_outlined,
                 title: 'Scan receipt',
                 subtitle: 'Scan or upload a receipt to auto-fill an expense',
-                onTap: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const ScanReceiptScreen())),
+                onTap: () => Navigator.of(context).push(MaterialPageRoute(
+                    builder: (_) => const ScanReceiptScreen())),
               ),
               _SettingsTile(
                 icon: Icons.category_outlined,
                 title: 'Categories',
                 subtitle: 'Add, edit and organize expense categories',
-                onTap: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const CategoriesScreen())),
+                onTap: () => Navigator.of(context).push(MaterialPageRoute(
+                    builder: (_) => const CategoriesScreen())),
               ),
               _SettingsTile(
                 icon: Icons.auto_awesome,
                 title: 'Auto-categorization',
                 subtitle: 'Keywords that sort your expenses automatically',
-                onTap: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const AutoCategorizationScreen())),
+                onTap: () => Navigator.of(context).push(MaterialPageRoute(
+                    builder: (_) => const AutoCategorizationScreen())),
               ),
               _SettingsTile(
                 icon: Icons.savings_outlined,
                 title: 'Savings goals',
                 subtitle: 'Track your savings targets',
-                onTap: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const GoalsScreen())),
+                onTap: () => Navigator.of(context).push(
+                    MaterialPageRoute(builder: (_) => const GoalsScreen())),
               ),
               _SettingsTile(
                 icon: Icons.autorenew,
                 title: 'Recurring transactions',
                 subtitle: 'Bills and subscriptions that repeat',
-                onTap: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const RecurringListScreen())),
+                onTap: () => Navigator.of(context).push(MaterialPageRoute(
+                    builder: (_) => const RecurringListScreen())),
               ),
               _SettingsTile(
                 icon: Icons.request_quote_outlined,
                 title: 'Loans & repayments',
                 subtitle: 'Repayment schedules aligned to your salary',
-                onTap: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const LoansScreen())),
+                onTap: () => Navigator.of(context).push(
+                    MaterialPageRoute(builder: (_) => const LoansScreen())),
               ),
             ],
           ),
@@ -121,13 +131,15 @@ class SettingsScreen extends StatelessWidget {
                 icon: Icons.upload_file_outlined,
                 title: 'Backup & restore',
                 subtitle: 'Export or import your full data',
-                onTap: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const BackupScreen())),
+                onTap: () => Navigator.of(context).push(
+                    MaterialPageRoute(builder: (_) => const BackupScreen())),
               ),
               _SettingsTile(
                 icon: Icons.table_view_outlined,
                 title: 'Import CSV',
                 subtitle: 'Import expenses or income from a file',
-                onTap: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const ImportScreen())),
+                onTap: () => Navigator.of(context).push(
+                    MaterialPageRoute(builder: (_) => const ImportScreen())),
               ),
             ],
           ),
@@ -137,13 +149,18 @@ class SettingsScreen extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(AppStrings.appName, style: Theme.of(context).textTheme.titleMedium),
+                Text(AppStrings.appName,
+                    style: Theme.of(context).textTheme.titleMedium),
                 const SizedBox(height: 4),
-                Text('Version 1.0.0', style: TextStyle(color: Theme.of(context).textTheme.bodySmall!.color)),
+                Text('Version 1.0.0',
+                    style: TextStyle(
+                        color: Theme.of(context).textTheme.bodySmall!.color)),
                 const SizedBox(height: 8),
                 Text(
                   'Your data never leaves this device. Everything is stored locally in your own database.',
-                  style: TextStyle(fontSize: 13, color: Theme.of(context).textTheme.bodySmall!.color),
+                  style: TextStyle(
+                      fontSize: 13,
+                      color: Theme.of(context).textTheme.bodySmall!.color),
                 ),
               ],
             ),
@@ -159,7 +176,11 @@ class _ProfileBanner extends StatelessWidget {
   final String currency;
   final String flag;
   final VoidCallback onTap;
-  const _ProfileBanner({required this.name, required this.currency, required this.flag, required this.onTap});
+  const _ProfileBanner(
+      {required this.name,
+      required this.currency,
+      required this.flag,
+      required this.onTap});
 
   @override
   Widget build(BuildContext context) {
@@ -169,7 +190,7 @@ class _ProfileBanner extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.all(18),
         decoration: BoxDecoration(
-          gradient: const LinearGradient(colors: AppColors.brandGradient),
+          color: AppColors.primary,
           borderRadius: BorderRadius.circular(22),
         ),
         child: Row(
@@ -182,23 +203,35 @@ class _ProfileBanner extends StatelessWidget {
                 shape: BoxShape.circle,
               ),
               alignment: Alignment.center,
-              child: Text(
-                name.isEmpty ? '👤' : (flag.isNotEmpty ? flag : name.characters.first.toUpperCase()),
-                style: const TextStyle(fontSize: 24),
-              ),
+              child: name.isEmpty
+                  ? const Icon(Icons.person, color: AppColors.onHero, size: 28)
+                  : Text(
+                      (flag.isNotEmpty
+                          ? flag
+                          : name.characters.first.toUpperCase()),
+                      style: const TextStyle(fontSize: 22),
+                    ),
             ),
             const SizedBox(width: 14),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(name, style: const TextStyle(color: Colors.white, fontSize: 17, fontWeight: FontWeight.w800), maxLines: 1, overflow: TextOverflow.ellipsis),
+                  Text(name.isEmpty ? 'Your name' : name,
+                      style: const TextStyle(
+                          color: AppColors.onHero,
+                          fontSize: 17,
+                          fontWeight: FontWeight.w800),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis),
                   const SizedBox(height: 4),
-                  Text('Primary currency: $currency', style: TextStyle(color: Colors.white.withValues(alpha: 0.8), fontSize: 13)),
+                  Text('Primary currency: $currency',
+                      style: TextStyle(
+                          color: AppColors.onHeroMuted, fontSize: 13)),
                 ],
               ),
             ),
-            Icon(Icons.chevron_right, color: Colors.white.withValues(alpha: 0.7)),
+            Icon(Icons.chevron_right, color: AppColors.onHeroMuted),
           ],
         ),
       ),
@@ -235,7 +268,12 @@ class _SettingsTile extends StatelessWidget {
   final String? subtitle;
   final Widget? trailing;
   final VoidCallback? onTap;
-  const _SettingsTile({required this.icon, required this.title, this.subtitle, this.trailing, this.onTap});
+  const _SettingsTile(
+      {required this.icon,
+      required this.title,
+      this.subtitle,
+      this.trailing,
+      this.onTap});
 
   @override
   Widget build(BuildContext context) {
@@ -249,9 +287,16 @@ class _SettingsTile extends StatelessWidget {
         ),
         child: Icon(icon, color: AppColors.primary, size: 21),
       ),
-      title: Text(title, style: const TextStyle(fontSize: 14.5, fontWeight: FontWeight.w600)),
-      subtitle: subtitle != null ? Text(subtitle!, style: TextStyle(fontSize: 12, color: Theme.of(context).textTheme.bodySmall!.color)) : null,
-      trailing: trailing ?? (onTap != null ? const Icon(Icons.chevron_right, size: 20) : null),
+      title: Text(title,
+          style: const TextStyle(fontSize: 14.5, fontWeight: FontWeight.w600)),
+      subtitle: subtitle != null
+          ? Text(subtitle!,
+              style: TextStyle(
+                  fontSize: 12,
+                  color: Theme.of(context).textTheme.bodySmall!.color))
+          : null,
+      trailing: trailing ??
+          (onTap != null ? const Icon(Icons.chevron_right, size: 20) : null),
       onTap: onTap,
     );
   }

@@ -30,9 +30,12 @@ class _AssistantScreenState extends State<AssistantScreen> {
               context: context,
               builder: (ctx) => AlertDialog(
                 title: const Text('What can I do?'),
-                content: const SingleChildScrollView(child: Text(AssistantService.helpText)),
+                content: const SingleChildScrollView(
+                    child: Text(AssistantService.helpText)),
                 actions: [
-                  TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Got it')),
+                  TextButton(
+                      onPressed: () => Navigator.pop(ctx),
+                      child: const Text('Got it')),
                 ],
               ),
             ),
@@ -61,19 +64,29 @@ class _AssistantScreenState extends State<AssistantScreen> {
                     gradient: LinearGradient(colors: AppColors.brandGradient),
                     shape: BoxShape.circle,
                   ),
-                  child: const Icon(Icons.smart_toy_outlined, color: Colors.white, size: 19),
+                  child: const Icon(Icons.forum_outlined,
+                      color: Colors.white, size: 19),
                 ),
                 const SizedBox(width: 10),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text('TrackMe CSR', style: TextStyle(fontWeight: FontWeight.w700, fontSize: 13.5)),
-                      Text('Online · replies instantly & logs expenses', style: TextStyle(fontSize: 11.5, color: Theme.of(context).textTheme.bodySmall!.color)),
+                      const Text('TrackMe CSR',
+                          style: TextStyle(
+                              fontWeight: FontWeight.w700, fontSize: 13.5)),
+                      Text('Online · replies instantly & logs expenses',
+                          style: TextStyle(
+                              fontSize: 11.5,
+                              color: Theme.of(context)
+                                  .textTheme
+                                  .bodySmall!
+                                  .color)),
                     ],
                   ),
                 ),
-                const Text('●', style: TextStyle(color: AppColors.income, fontSize: 12)),
+                const Text('●',
+                    style: TextStyle(color: AppColors.income, fontSize: 12)),
               ],
             ),
           ),

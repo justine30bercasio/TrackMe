@@ -30,7 +30,9 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
 
   void _next() {
     if (_page < _totalPages - 1) {
-      _controller.nextPage(duration: const Duration(milliseconds: 350), curve: Curves.easeOutCubic);
+      _controller.nextPage(
+          duration: const Duration(milliseconds: 350),
+          curve: Curves.easeOutCubic);
     } else {
       _finish();
     }
@@ -60,11 +62,13 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
       await repo.logActivity('onboarding', 'Completed onboarding setup');
       if (!mounted) return;
       Provider.of<AppState>(context, listen: false).reloadUser();
-      Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (_) => const MainShell()));
+      Navigator.of(context).pushReplacement(
+          MaterialPageRoute(builder: (_) => const MainShell()));
     } catch (e) {
       setState(() => _saving = false);
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Something went wrong: $e')));
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text('Something went wrong: $e')));
     }
   }
 
@@ -104,7 +108,9 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                           width: active ? 24 : 8,
                           height: 8,
                           decoration: BoxDecoration(
-                            color: active ? AppColors.primary : Theme.of(context).dividerColor,
+                            color: active
+                                ? AppColors.primary
+                                : Theme.of(context).dividerColor,
                             borderRadius: BorderRadius.circular(8),
                           ),
                         );
@@ -112,7 +118,9 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                     ),
                   ),
                   TextButton(
-                    onPressed: _page < _totalPages - 1 ? () => _controller.jumpToPage(_totalPages - 1) : _finish,
+                    onPressed: _page < _totalPages - 1
+                        ? () => _controller.jumpToPage(_totalPages - 1)
+                        : _finish,
                     child: const Text('Skip'),
                   ),
                 ],
@@ -150,8 +158,14 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
               child: ElevatedButton(
                 onPressed: _saving ? null : _next,
                 child: _saving
-                    ? const SizedBox(width: 22, height: 22, child: CircularProgressIndicator(strokeWidth: 2.4, color: Colors.white))
-                    : Text(_page == _totalPages - 1 ? 'Start Managing Money' : 'Continue'),
+                    ? const SizedBox(
+                        width: 22,
+                        height: 22,
+                        child: CircularProgressIndicator(
+                            strokeWidth: 2.4, color: Colors.white))
+                    : Text(_page == _totalPages - 1
+                        ? 'Start Managing Money'
+                        : 'Continue'),
               ),
             ),
           ],
@@ -177,17 +191,21 @@ class _NamePage extends StatelessWidget {
             width: 72,
             height: 72,
             decoration: BoxDecoration(
-              gradient: const LinearGradient(colors: AppColors.brandGradient),
+              color: AppColors.primary,
               borderRadius: BorderRadius.circular(22),
             ),
-            child: const Icon(Icons.savings_outlined, color: Colors.white, size: 36),
+            child: const Icon(Icons.savings_outlined,
+                color: AppColors.onHero, size: 36),
           ),
           const SizedBox(height: 28),
           Text('Welcome!', style: Theme.of(context).textTheme.displaySmall),
           const SizedBox(height: 10),
           Text(
             'Take control of your money with a simple, private expense tracker that works fully offline.',
-            style: TextStyle(color: Theme.of(context).textTheme.bodySmall!.color, fontSize: 15, height: 1.4),
+            style: TextStyle(
+                color: Theme.of(context).textTheme.bodySmall!.color,
+                fontSize: 15,
+                height: 1.4),
           ),
           const SizedBox(height: 30),
           TextField(
@@ -200,7 +218,9 @@ class _NamePage extends StatelessWidget {
           ),
           const SizedBox(height: 14),
           Text('Your data stays on your device. No account, no server, no ads.',
-              style: TextStyle(fontSize: 12, color: Theme.of(context).textTheme.bodySmall!.color)),
+              style: TextStyle(
+                  fontSize: 12,
+                  color: Theme.of(context).textTheme.bodySmall!.color)),
         ],
       ),
     );
@@ -230,7 +250,9 @@ class _PreferencesPage extends StatelessWidget {
       isScrollControlled: true,
       builder: (ctx) => _PickerSheet(
         title: 'Select Country',
-        items: AppStrings.countryNames.entries.map((e) => PickerItem(e.value, e.key)).toList(),
+        items: AppStrings.countryNames.entries
+            .map((e) => PickerItem(e.value, e.key))
+            .toList(),
       ),
     );
     if (selected != null) onCountry(selected);
@@ -242,7 +264,10 @@ class _PreferencesPage extends StatelessWidget {
       isScrollControlled: true,
       builder: (ctx) => _PickerSheet(
         title: 'Preferred Currency',
-        items: AppStrings.supportedCurrencies.map((c) => PickerItem('$c - ${AppStrings.currencyNames[c] ?? c}', c)).toList(),
+        items: AppStrings.supportedCurrencies
+            .map((c) =>
+                PickerItem('$c - ${AppStrings.currencyNames[c] ?? c}', c))
+            .toList(),
       ),
     );
     if (selected != null) onCurrency(selected);
@@ -254,21 +279,27 @@ class _PreferencesPage extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 28),
       children: [
         const SizedBox(height: 24),
-        Text('Set your preferences', style: Theme.of(context).textTheme.headlineMedium),
+        Text('Set your preferences',
+            style: Theme.of(context).textTheme.headlineMedium),
         const SizedBox(height: 8),
-        Text('You can change these later in Settings.', style: TextStyle(color: Theme.of(context).textTheme.bodySmall!.color)),
+        Text('You can change these later in Settings.',
+            style:
+                TextStyle(color: Theme.of(context).textTheme.bodySmall!.color)),
         const SizedBox(height: 28),
         _PrefTile(
           icon: Icons.public,
           label: 'Country',
-          value: country.isEmpty ? 'Not selected' : AppStrings.countryNames[country] ?? country,
+          value: country.isEmpty
+              ? 'Not selected'
+              : AppStrings.countryNames[country] ?? country,
           onTap: () => _pickCountry(context),
         ),
         const SizedBox(height: 12),
         _PrefTile(
           icon: Icons.currency_exchange,
           label: 'Preferred currency',
-          value: '$currency  ${AppStrings.currencyNames[currency] ?? ''}'.trim(),
+          value:
+              '$currency  ${AppStrings.currencyNames[currency] ?? ''}'.trim(),
           onTap: () => _pickCurrency(context),
         ),
         const SizedBox(height: 12),
@@ -282,7 +313,9 @@ class _PreferencesPage extends StatelessWidget {
               isScrollControlled: true,
               builder: (ctx) => _PickerSheet(
                 title: 'Language',
-                items: AppStrings.languages.entries.map((e) => PickerItem(e.value, e.key)).toList(),
+                items: AppStrings.languages.entries
+                    .map((e) => PickerItem(e.value, e.key))
+                    .toList(),
               ),
             );
             if (selected != null) onLanguage(selected);
@@ -317,7 +350,9 @@ class _PickerSheetState extends State<_PickerSheet> {
   Widget build(BuildContext context) {
     final filtered = query.isEmpty
         ? widget.items
-        : widget.items.where((i) => i.label.toLowerCase().contains(query.toLowerCase())).toList();
+        : widget.items
+            .where((i) => i.label.toLowerCase().contains(query.toLowerCase()))
+            .toList();
     return SafeArea(
       child: SizedBox(
         height: MediaQuery.of(context).size.height * 0.7,
@@ -327,9 +362,12 @@ class _PickerSheetState extends State<_PickerSheet> {
               padding: const EdgeInsets.fromLTRB(20, 18, 20, 8),
               child: Row(
                 children: [
-                  Text(widget.title, style: Theme.of(context).textTheme.titleLarge),
+                  Text(widget.title,
+                      style: Theme.of(context).textTheme.titleLarge),
                   const Spacer(),
-                  TextButton(onPressed: () => Navigator.pop(context), child: const Text('Cancel')),
+                  TextButton(
+                      onPressed: () => Navigator.pop(context),
+                      child: const Text('Cancel')),
                 ],
               ),
             ),
@@ -337,7 +375,8 @@ class _PickerSheetState extends State<_PickerSheet> {
               padding: const EdgeInsets.fromLTRB(20, 0, 20, 12),
               child: TextField(
                 onChanged: (v) => setState(() => query = v),
-                decoration: const InputDecoration(hintText: 'Search...', prefixIcon: Icon(Icons.search)),
+                decoration: const InputDecoration(
+                    hintText: 'Search...', prefixIcon: Icon(Icons.search)),
               ),
             ),
             Expanded(
@@ -346,7 +385,8 @@ class _PickerSheetState extends State<_PickerSheet> {
                 itemBuilder: (ctx, i) {
                   final item = filtered[i];
                   return ListTile(
-                    leading: const Icon(Icons.check_circle_outline, color: AppColors.primary, size: 22),
+                    leading: const Icon(Icons.check_circle_outline,
+                        color: AppColors.primary, size: 22),
                     title: Text(item.label),
                     onTap: () => Navigator.pop(ctx, item.value),
                   );
@@ -365,7 +405,11 @@ class _PrefTile extends StatelessWidget {
   final String label;
   final String value;
   final VoidCallback onTap;
-  const _PrefTile({required this.icon, required this.label, required this.value, required this.onTap});
+  const _PrefTile(
+      {required this.icon,
+      required this.label,
+      required this.value,
+      required this.onTap});
 
   @override
   Widget build(BuildContext context) {
@@ -377,7 +421,10 @@ class _PrefTile extends StatelessWidget {
         decoration: BoxDecoration(
           color: Theme.of(context).colorScheme.surface,
           borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: Theme.of(context).brightness == Brightness.dark ? const Color(0xFF262C38) : const Color(0xFFEEF0F6)),
+          border: Border.all(
+              color: Theme.of(context).brightness == Brightness.dark
+                  ? const Color(0xFF262C38)
+                  : const Color(0xFFEEF0F6)),
         ),
         child: Row(
           children: [
@@ -387,7 +434,10 @@ class _PrefTile extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(label, style: TextStyle(fontSize: 12, color: Theme.of(context).textTheme.bodySmall!.color)),
+                  Text(label,
+                      style: TextStyle(
+                          fontSize: 12,
+                          color: Theme.of(context).textTheme.bodySmall!.color)),
                   const SizedBox(height: 2),
                   Text(value, style: Theme.of(context).textTheme.titleMedium),
                 ],
@@ -412,10 +462,13 @@ class _CategoriesPage extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 28),
       children: [
         const SizedBox(height: 24),
-        Text('Pick your categories', style: Theme.of(context).textTheme.headlineMedium),
+        Text('Pick your categories',
+            style: Theme.of(context).textTheme.headlineMedium),
         const SizedBox(height: 8),
-        Text('Choose the categories you use most so logging is fast. You can add more later.',
-            style: TextStyle(color: Theme.of(context).textTheme.bodySmall!.color)),
+        Text(
+            'Choose the categories you use most so logging is fast. You can add more later.',
+            style:
+                TextStyle(color: Theme.of(context).textTheme.bodySmall!.color)),
         const SizedBox(height: 24),
         Wrap(
           spacing: 12,
@@ -440,7 +493,11 @@ class _CategoryChip extends StatelessWidget {
   final String color;
   final bool selected;
   final VoidCallback onTap;
-  const _CategoryChip({required this.name, required this.color, required this.selected, required this.onTap});
+  const _CategoryChip(
+      {required this.name,
+      required this.color,
+      required this.selected,
+      required this.onTap});
 
   @override
   Widget build(BuildContext context) {
@@ -452,19 +509,34 @@ class _CategoryChip extends StatelessWidget {
         duration: const Duration(milliseconds: 180),
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
         decoration: BoxDecoration(
-          color: selected ? clr.withValues(alpha: 0.15) : Theme.of(context).colorScheme.surface,
+          color: selected
+              ? clr.withValues(alpha: 0.15)
+              : Theme.of(context).colorScheme.surface,
           borderRadius: BorderRadius.circular(16),
           border: Border.all(
-            color: selected ? clr : Theme.of(context).brightness == Brightness.dark ? const Color(0xFF262C38) : const Color(0xFFEEF0F6),
+            color: selected
+                ? clr
+                : Theme.of(context).brightness == Brightness.dark
+                    ? const Color(0xFF262C38)
+                    : const Color(0xFFEEF0F6),
             width: selected ? 2 : 1,
           ),
         ),
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(selected ? Icons.check_circle : categoryIcon(name), color: selected ? clr : Theme.of(context).textTheme.bodyLarge!.color, size: 20),
+            Icon(selected ? Icons.check_circle : categoryIcon(name),
+                color: selected
+                    ? clr
+                    : Theme.of(context).textTheme.bodyLarge!.color,
+                size: 20),
             const SizedBox(width: 8),
-            Text(name, style: TextStyle(fontWeight: FontWeight.w600, color: selected ? clr : Theme.of(context).textTheme.bodyLarge!.color)),
+            Text(name,
+                style: TextStyle(
+                    fontWeight: FontWeight.w600,
+                    color: selected
+                        ? clr
+                        : Theme.of(context).textTheme.bodyLarge!.color)),
           ],
         ),
       ),

@@ -27,7 +27,7 @@ class AppCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final radius = borderRadius ?? BorderRadius.circular(20);
+    final radius = borderRadius ?? BorderRadius.circular(AppTheme.radiusLg);
     final card = Container(
       padding: padding,
       margin: margin,
@@ -36,15 +36,101 @@ class AppCard extends StatelessWidget {
         borderRadius: radius,
         border: Border.all(
           color: Theme.of(context).brightness == Brightness.dark
-              ? const Color(0xFF262C38)
-              : const Color(0xFFEEF0F6),
+              ? AppColors.cardBorderDark
+              : AppColors.cardBorderLight,
           width: 1,
         ),
       ),
       child: child,
     );
     if (onTap == null && onLongPress == null) return card;
-    return InkWell(borderRadius: radius, onTap: onTap, onLongPress: onLongPress, child: card);
+    return InkWell(
+        borderRadius: radius,
+        onTap: onTap,
+        onLongPress: onLongPress,
+        child: card);
+  }
+}
+
+/// A confident, mostly-solid hero surface for the app's headline numbers.
+///
+/// Intentionally uses a single brand colour instead of a full gradient fill:
+/// gradients are reserved for tiny accents only, so hero cards stay calm,
+/// premium and consistent across light & dark mode.
+enum HeroCardTone { brand, navy, income, expense, neutral }
+
+class BrandHeroCard extends StatelessWidget {
+  final HeroCardTone tone;
+  final Widget child;
+  final EdgeInsetsGeometry padding;
+  final double radius;
+  final bool emphasize;
+
+  const BrandHeroCard({
+    super.key,
+    this.tone = HeroCardTone.brand,
+    required this.child,
+    this.padding = const EdgeInsets.all(22),
+    this.radius = 24,
+    this.emphasize = true,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final Color background;
+    switch (tone) {
+      case HeroCardTone.brand:
+        background = AppColors.primary;
+        break;
+      case HeroCardTone.navy:
+        background = AppColors.heroDarkNavy;
+        break;
+      case HeroCardTone.income:
+        background = AppColors.income;
+        break;
+      case HeroCardTone.expense:
+        background = AppColors.expense;
+        break;
+      case HeroCardTone.neutral:
+        background = isDark ? AppColors.surfaceDark2 : Colors.white;
+        break;
+    }
+    return Container(
+      padding: padding,
+      decoration: BoxDecoration(
+        color: background,
+        borderRadius: BorderRadius.circular(radius),
+        border: Border.all(color: background.withValues(alpha: 0.1)),
+        boxShadow: [
+          BoxShadow(
+            color: background.withValues(
+                alpha: tone == HeroCardTone.neutral ? 0.06 : 0.28),
+            blurRadius: 22,
+            offset: const Offset(0, 10),
+          ),
+        ],
+      ),
+      child: Stack(
+        children: [
+          // A single soft highlight stays in the corner — no full gradients.
+          if (emphasize && tone != HeroCardTone.neutral)
+            Positioned(
+              right: -30,
+              top: -40,
+              child: Container(
+                width: 140,
+                height: 140,
+                decoration: BoxDecoration(
+                  color: Colors.white.withValues(alpha: 0.06),
+                  shape: BoxShape.circle,
+                ),
+              ),
+            ),
+          child,
+        ],
+      ),
+    );
   }
 }
 
@@ -69,9 +155,7 @@ class MoneyText extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final nf = NumberFormat('#,##0.00');
-    final sign = showSign && amount != 0
-        ? (amount > 0 ? '+' : '-')
-        : '';
+    final sign = showSign && amount != 0 ? (amount > 0 ? '+' : '-') : '';
     return Text(
       '$sign${currencySymbol(currencyCode)}${nf.format(amount.abs())}',
       maxLines: 1,
@@ -87,12 +171,34 @@ class MoneyText extends StatelessWidget {
 
 String currencySymbol(String code) {
   const symbols = {
-    'USD': r'$', 'EUR': '€', 'GBP': '£', 'JPY': '¥', 'PHP': '₱',
-    'AUD': r'A$', 'CAD': r'C$', 'SGD': r'S$', 'HKD': r'HK$', 'INR': '₹',
-    'THB': '฿', 'MYR': 'RM', 'IDR': 'Rp', 'VND': '₫', 'CNY': '¥',
-    'CHF': 'Fr', 'SEK': 'kr', 'NOK': 'kr', 'DKK': 'kr', 'BRL': r'R$',
-    'MXN': r'$', 'NZD': r'NZ$', 'KRW': '₩', 'TWD': r'NT$', 'AED': 'د.إ',
-    'SAR': '﷼', 'ZAR': 'R', 'ARS': r'$',
+    'USD': r'$',
+    'EUR': '€',
+    'GBP': '£',
+    'JPY': '¥',
+    'PHP': '₱',
+    'AUD': r'A$',
+    'CAD': r'C$',
+    'SGD': r'S$',
+    'HKD': r'HK$',
+    'INR': '₹',
+    'THB': '฿',
+    'MYR': 'RM',
+    'IDR': 'Rp',
+    'VND': '₫',
+    'CNY': '¥',
+    'CHF': 'Fr',
+    'SEK': 'kr',
+    'NOK': 'kr',
+    'DKK': 'kr',
+    'BRL': r'R$',
+    'MXN': r'$',
+    'NZD': r'NZ$',
+    'KRW': '₩',
+    'TWD': r'NT$',
+    'AED': 'د.إ',
+    'SAR': '﷼',
+    'ZAR': 'R',
+    'ARS': r'$',
   };
   return symbols[code] ?? r'$';
 }
@@ -104,13 +210,27 @@ String formatMoney(double amount, String currencyCode, {int decimals = 2}) {
 
 IconData categoryIcon(String categoryName, {String fallback = 'other'}) {
   final name = categoryName.toLowerCase();
-  if (name.contains('food') || name.contains('restaurant') || name.contains('grocery')) return Icons.restaurant;
-  if (name.contains('transport') || name.contains('fuel') || name.contains('gas')) return Icons.directions_car;
-  if (name.contains('entertain') || name.contains('movie') || name.contains('music')) return Icons.movie;
-  if (name.contains('health') || name.contains('medical') || name.contains('doctor')) return Icons.local_hospital;
-  if (name.contains('education') || name.contains('school') || name.contains('tuition')) return Icons.school;
-  if (name.contains('bill') || name.contains('utility') || name.contains('electric')) return Icons.receipt_long;
-  if (name.contains('shopping') || name.contains('mall') || name.contains('shop')) return Icons.shopping_bag;
+  if (name.contains('food') ||
+      name.contains('restaurant') ||
+      name.contains('grocery')) return Icons.restaurant;
+  if (name.contains('transport') ||
+      name.contains('fuel') ||
+      name.contains('gas')) return Icons.directions_car;
+  if (name.contains('entertain') ||
+      name.contains('movie') ||
+      name.contains('music')) return Icons.movie;
+  if (name.contains('health') ||
+      name.contains('medical') ||
+      name.contains('doctor')) return Icons.local_hospital;
+  if (name.contains('education') ||
+      name.contains('school') ||
+      name.contains('tuition')) return Icons.school;
+  if (name.contains('bill') ||
+      name.contains('utility') ||
+      name.contains('electric')) return Icons.receipt_long;
+  if (name.contains('shopping') ||
+      name.contains('mall') ||
+      name.contains('shop')) return Icons.shopping_bag;
   if (name.contains('salary') || name.contains('income')) return Icons.payments;
   if (name.contains('saving')) return Icons.savings;
   if (name.contains('travel') || name.contains('vacation')) return Icons.flight;
@@ -130,7 +250,8 @@ class PaymentMethodBadge extends StatelessWidget {
   final double size;
   final bool outlined;
 
-  const PaymentMethodBadge({super.key, required this.code, this.size = 26, this.outlined = false});
+  const PaymentMethodBadge(
+      {super.key, required this.code, this.size = 26, this.outlined = false});
 
   @override
   Widget build(BuildContext context) {
@@ -175,7 +296,11 @@ class PaymentMethodBadge extends StatelessWidget {
             ? Icon(icon, color: fg, size: size * 0.58)
             : Text(
                 monogram ?? (code.isEmpty ? '?' : code[0].toUpperCase()),
-                style: TextStyle(color: fg, fontSize: size * (monogram != null && monogram.length > 2 ? 0.26 : 0.42), fontWeight: FontWeight.w800),
+                style: TextStyle(
+                    color: fg,
+                    fontSize: size *
+                        (monogram != null && monogram.length > 2 ? 0.26 : 0.42),
+                    fontWeight: FontWeight.w800),
                 maxLines: 1,
                 textAlign: TextAlign.center,
               ),
@@ -199,7 +324,8 @@ class CategoryAvatar extends StatelessWidget {
   final double size;
   final IconData? icon;
 
-  const CategoryAvatar({super.key, this.color, this.name, this.size = 40, this.icon});
+  const CategoryAvatar(
+      {super.key, this.color, this.name, this.size = 40, this.icon});
 
   @override
   Widget build(BuildContext context) {
@@ -253,9 +379,13 @@ class EmptyState extends StatelessWidget {
               child: Icon(icon, size: 40, color: AppColors.primary),
             ),
             const SizedBox(height: 20),
-            Text(title, style: Theme.of(context).textTheme.titleMedium, textAlign: TextAlign.center),
+            Text(title,
+                style: Theme.of(context).textTheme.titleMedium,
+                textAlign: TextAlign.center),
             const SizedBox(height: 8),
-            Text(message, style: TextStyle(color: secondary, fontSize: 14), textAlign: TextAlign.center),
+            Text(message,
+                style: TextStyle(color: secondary, fontSize: 14),
+                textAlign: TextAlign.center),
             if (action != null) ...[
               const SizedBox(height: 20),
               action!,
@@ -272,7 +402,10 @@ class SectionTitle extends StatelessWidget {
   final Widget? trailing;
   final EdgeInsetsGeometry padding;
 
-  const SectionTitle(this.title, {super.key, this.trailing, this.padding = const EdgeInsets.fromLTRB(20, 8, 20, 12)});
+  const SectionTitle(this.title,
+      {super.key,
+      this.trailing,
+      this.padding = const EdgeInsets.fromLTRB(20, 8, 20, 12)});
 
   @override
   Widget build(BuildContext context) {
@@ -280,7 +413,9 @@ class SectionTitle extends StatelessWidget {
       padding: padding,
       child: Row(
         children: [
-          Expanded(child: Text(title, style: Theme.of(context).textTheme.titleMedium)),
+          Expanded(
+              child:
+                  Text(title, style: Theme.of(context).textTheme.titleMedium)),
           if (trailing != null) trailing!,
         ],
       ),
@@ -302,7 +437,11 @@ class Pill extends StatelessWidget {
         color: color.withValues(alpha: 0.12),
         borderRadius: BorderRadius.circular(30),
       ),
-      child: Text(text, style: TextStyle(color: color, fontSize: 12, fontWeight: FontWeight.w700), maxLines: 1, overflow: TextOverflow.ellipsis),
+      child: Text(text,
+          style: TextStyle(
+              color: color, fontSize: 12, fontWeight: FontWeight.w700),
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis),
     );
   }
 }
@@ -341,7 +480,10 @@ class StatTile extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(label, style: TextStyle(color: Theme.of(context).textTheme.bodySmall!.color, fontSize: 12)),
+                Text(label,
+                    style: TextStyle(
+                        color: Theme.of(context).textTheme.bodySmall!.color,
+                        fontSize: 12)),
                 const SizedBox(height: 2),
                 value,
               ],
@@ -358,11 +500,17 @@ class ProgressBar extends StatelessWidget {
   final Color color;
   final double height;
 
-  const ProgressBar({super.key, required this.fraction, this.color = AppColors.primary, this.height = 8});
+  const ProgressBar(
+      {super.key,
+      required this.fraction,
+      this.color = AppColors.primary,
+      this.height = 8});
 
   @override
   Widget build(BuildContext context) {
-    final bg = Theme.of(context).brightness == Brightness.dark ? AppColors.surfaceDark2 : const Color(0xFFE9EBF2);
+    final bg = Theme.of(context).brightness == Brightness.dark
+        ? AppColors.surfaceDark2
+        : const Color(0xFFE9EBF2);
     return ClipRRect(
       borderRadius: BorderRadius.circular(height),
       child: SizedBox(
