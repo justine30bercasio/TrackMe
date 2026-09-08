@@ -7,6 +7,7 @@ import 'package:track_me/screens/receipts/scan_receipt_screen.dart';
 import 'package:track_me/screens/recurring/recurring_form_screen.dart';
 import 'package:track_me/screens/transactions/expense_form_screen.dart';
 import 'package:track_me/screens/transactions/income_form_screen.dart';
+import 'package:track_me/screens/transfers/transfer_form_screen.dart';
 
 class QuickAddSheet extends StatelessWidget {
   const QuickAddSheet({super.key});
@@ -73,19 +74,19 @@ class QuickAddSheet extends StatelessWidget {
                 children: [
                   Expanded(
                     child: _ActionCard(
-                      label: 'Recurring',
-                      icon: Icons.autorenew,
+                      label: 'Transfer',
+                      icon: Icons.swap_horiz,
                       color: AppColors.secondary,
-                      onTap: () => _open(context, const RecurringFormScreen()),
+                      onTap: () => _open(context, const TransferFormScreen()),
                     ),
                   ),
                   const SizedBox(width: 12),
                   Expanded(
                     child: _ActionCard(
-                      label: 'Receipts',
-                      icon: Icons.receipt_long_outlined,
+                      label: 'Recurring',
+                      icon: Icons.autorenew,
                       color: AppColors.accent,
-                      onTap: () => _open(context, const ReceiptsScreen()),
+                      onTap: () => _open(context, const RecurringFormScreen()),
                     ),
                   ),
                 ],
@@ -95,19 +96,19 @@ class QuickAddSheet extends StatelessWidget {
                 children: [
                   Expanded(
                     child: _ActionCard(
-                      label: 'Scan receipt',
-                      icon: Icons.document_scanner_outlined,
-                      color: AppColors.primary,
-                      onTap: () => _open(context, const ScanReceiptScreen()),
+                      label: 'Receipts',
+                      icon: Icons.receipt_long_outlined,
+                      color: AppColors.secondary,
+                      onTap: () => _open(context, const ReceiptsScreen()),
                     ),
                   ),
                   const SizedBox(width: 12),
                   Expanded(
                     child: _ActionCard(
-                      label: 'Assistant',
-                      icon: Icons.forum_outlined,
-                      color: AppColors.secondary,
-                      onTap: () => _open(context, const AssistantScreen()),
+                      label: 'Scan receipt',
+                      icon: Icons.document_scanner_outlined,
+                      color: AppColors.primary,
+                      onTap: () => _open(context, const ScanReceiptScreen()),
                     ),
                   ),
                 ],

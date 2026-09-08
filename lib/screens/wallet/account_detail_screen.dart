@@ -9,6 +9,7 @@ import 'package:track_me/data/models.dart';
 import 'package:track_me/providers/app_state.dart';
 import 'package:track_me/screens/transactions/expense_form_screen.dart';
 import 'package:track_me/screens/transactions/income_form_screen.dart';
+import 'package:track_me/screens/transfers/transfer_form_screen.dart';
 
 class AccountDetailScreen extends StatefulWidget {
   final String paymentMethodCode;
@@ -22,6 +23,7 @@ class AccountDetailScreen extends StatefulWidget {
 class _AccountDetailScreenState extends State<AccountDetailScreen> {
   List<Expense> _expenses = [];
   List<Income> _incomes = [];
+  List<Transfer> _transfers = [];
   PaymentMethodStat? _stat;
   bool _loading = true;
 
@@ -40,11 +42,14 @@ class _AccountDetailScreenState extends State<AccountDetailScreen> {
         await repo.getExpenses(paymentMethod: widget.paymentMethodCode);
     final incomes =
         await repo.getIncomes(paymentMethod: widget.paymentMethodCode);
+    final transfers =
+        await repo.getTransfersForMethod(widget.paymentMethodCode);
     if (!mounted) return;
     setState(() {
       _stat = stats[widget.paymentMethodCode] ?? const PaymentMethodStat(0, 0);
       _expenses = expenses;
       _incomes = incomes;
+      _transfers = transfers;
       _loading = false;
     });
   }
@@ -58,6 +63,20 @@ class _AccountDetailScreenState extends State<AccountDetailScreen> {
 
   List<_ActivityItem> _buildItems() {
     final items = <_ActivityItem>[
+      for (final t in _transfers)
+        _ActivityItem(
+          type: 'transfer',
+          id: t.id ?? 0,
+          title: t.fromMethod == widget.paymentMethodCode
+              ? 'To ${paymentMethodLabel(t.toMethod)}'
+              : 'From ${paymentMethodLabel(t.fromMethod)}',
+          subtitle: 'Transfer',
+          colorHex: null,
+          dateIso: t.transferDate,
+          createdAt: t.createdAt,
+          amount: t.amount,
+          isOutgoing: t.fromMethod == widget.paymentMethodCode,
+        ),
       for (final e in _expenses)
         _ActivityItem(
           type: 'expense',
@@ -181,18 +200,28 @@ class _AccountDetailScreenState extends State<AccountDetailScreen> {
                               initialPaymentMethod: widget.paymentMethodCode)),
                         ),
                       ),
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: _QuickActionCard(
+                          label: 'Transfer',
+                          icon: Icons.swap_horiz,
+                          color: AppColors.secondary,
+                          onTap: () => _openForm(TransferFormScreen(
+                              initialFromMethod: widget.paymentMethodCode)),
+                        ),
+                      ),
                     ],
                   ),
                   const SizedBox(height: 22),
                   Text('Recent activity',
                       style: Theme.of(context).textTheme.titleMedium),
                   const SizedBox(height: 10),
-                  if (_expenses.isEmpty && _incomes.isEmpty)
+                  if (_expenses.isEmpty && _incomes.isEmpty && _transfers.isEmpty)
                     EmptyState(
                       icon: Icons.receipt_long_outlined,
                       title: 'No activity yet',
                       message:
-                          'Expenses and income paid via $_label will show up here.',
+                          'Expenses, income and transfers using $_label will show up here.',
                     )
                   else
                     ..._buildItems().take(60).map((item) =>
@@ -277,6 +306,7 @@ class _ActivityItem {
   final String dateIso;
   final String createdAt;
   final double amount;
+  final bool isOutgoing;
 
   const _ActivityItem({
     required this.type,
@@ -287,6 +317,7 @@ class _ActivityItem {
     required this.dateIso,
     required this.createdAt,
     required this.amount,
+    this.isOutgoing = false,
   });
 }
 
@@ -299,11 +330,18 @@ class _ActivityTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isIncome = item.type == 'income';
-    final amountColor = isIncome ? AppColors.income : AppColors.expense;
+    final isTransfer = item.type == 'transfer';
+    final amountColor = isIncome
+        ? AppColors.income
+        : isTransfer
+            ? AppColors.secondary
+            : AppColors.expense;
     final badgeColor = isIncome
         ? AppColors.income
-        : AppColors.colorFromHex(item.colorHex ?? '',
-            fallback: AppColors.primary);
+        : isTransfer
+            ? AppColors.secondary
+            : AppColors.colorFromHex(item.colorHex ?? '',
+                fallback: AppColors.primary);
 
     return AppCard(
       margin: const EdgeInsets.only(bottom: 8),
@@ -318,9 +356,14 @@ class _ActivityTile extends StatelessWidget {
               borderRadius: BorderRadius.circular(12),
             ),
             child: Icon(
-                isIncome ? Icons.south_west : categoryIcon(item.subtitle),
-                color: badgeColor,
-                size: 18),
+              isTransfer
+                  ? (item.isOutgoing
+                      ? Icons.call_made
+                      : Icons.call_received)
+                  : (isIncome ? Icons.south_west : categoryIcon(item.subtitle)),
+              color: badgeColor,
+              size: 18,
+            ),
           ),
           const SizedBox(width: 12),
           Expanded(
@@ -344,7 +387,7 @@ class _ActivityTile extends StatelessWidget {
           ),
           const SizedBox(width: 8),
           Text(
-            '${isIncome ? '+' : '-'}${formatMoney(item.amount, currency)}',
+            '${isTransfer && item.isOutgoing ? '-' : isIncome ? '+' : ''}${formatMoney(item.amount, currency)}',
             style: TextStyle(
                 color: amountColor,
                 fontSize: 13.5,

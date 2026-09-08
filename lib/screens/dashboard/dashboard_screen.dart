@@ -797,6 +797,7 @@ class _BalanceHero extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final positive = data.netWorth >= 0;
+    final hidden = context.watch<AppState>().hideBalances;
     return BrandHeroCard(
       tone: HeroCardTone.brand,
       child: Column(
@@ -813,7 +814,9 @@ class _BalanceHero extends StatelessWidget {
                             color: AppColors.onHeroMuted, fontSize: 13)),
                     const SizedBox(height: 4),
                     Text(
-                      '${positive ? '' : '-'}${currencySymbol(currency)}${data.netWorth.abs().toStringAsFixed(2)}',
+                      hidden
+                          ? '••••••'
+                          : '${positive ? '' : '-'}${currencySymbol(currency)}${data.netWorth.abs().toStringAsFixed(2)}',
                       style: const TextStyle(
                           color: AppColors.onHero,
                           fontSize: 30,
@@ -841,7 +844,8 @@ class _BalanceHero extends StatelessWidget {
                     label: 'Income (all time)',
                     amount: data.totalIncomeAll,
                     currency: currency,
-                    color: const Color(0xFF7CFFD8)),
+                    color: const Color(0xFF7CFFD8),
+                    hidden: hidden),
               ),
               Container(
                   width: 1,
@@ -852,7 +856,8 @@ class _BalanceHero extends StatelessWidget {
                     label: 'Expenses (all time)',
                     amount: data.totalExpenseAll,
                     currency: currency,
-                    color: const Color(0xFFFFB7C5)),
+                    color: const Color(0xFFFFB7C5),
+                    hidden: hidden),
               ),
             ],
           ),
@@ -867,11 +872,13 @@ class _HeroStat extends StatelessWidget {
   final double amount;
   final String currency;
   final Color color;
+  final bool hidden;
   const _HeroStat(
       {required this.label,
       required this.amount,
       required this.currency,
-      required this.color});
+      required this.color,
+      this.hidden = false});
 
   @override
   Widget build(BuildContext context) {
@@ -883,7 +890,7 @@ class _HeroStat extends StatelessWidget {
             style: TextStyle(color: AppColors.onHeroMuted, fontSize: 11)),
         const SizedBox(height: 4),
         Text(
-          formatMoney(amount, currency),
+          hidden ? '••••••' : formatMoney(amount, currency),
           textAlign: TextAlign.center,
           style: TextStyle(
               color: color, fontWeight: FontWeight.w800, fontSize: 14),

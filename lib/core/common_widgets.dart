@@ -208,6 +208,13 @@ String formatMoney(double amount, String currencyCode, {int decimals = 2}) {
   return '${currencySymbol(currencyCode)}${nf.format(amount)}';
 }
 
+/// Masked balance used when the user enables "hide balances".
+String maskMoney(String currencyCode) => '${currencySymbol(currencyCode)}••••••';
+
+/// Throws/returns formatting that keeps the currency when hiding values.
+String visibleOrMasked(double amount, String currencyCode, bool hidden) =>
+    hidden ? maskMoney(currencyCode) : formatMoney(amount, currencyCode);
+
 IconData categoryIcon(String categoryName, {String fallback = 'other'}) {
   final name = categoryName.toLowerCase();
   if (name.contains('food') ||
@@ -393,6 +400,40 @@ class EmptyState extends StatelessWidget {
           ],
         ),
       ),
+    );
+  }
+}
+
+/// Friendly error state with a retry action. Never expose raw exceptions.
+class ErrorState extends StatelessWidget {
+  final IconData icon;
+  final String title;
+  final String message;
+  final VoidCallback? onRetry;
+  final String retryLabel;
+
+  const ErrorState({
+    super.key,
+    this.icon = Icons.error_outline,
+    required this.title,
+    required this.message,
+    this.onRetry,
+    this.retryLabel = 'Try again',
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return EmptyState(
+      icon: icon,
+      title: title,
+      message: message,
+      action: onRetry == null
+          ? null
+          : OutlinedButton.icon(
+              onPressed: onRetry,
+              icon: const Icon(Icons.refresh, size: 18),
+              label: Text(retryLabel),
+            ),
     );
   }
 }

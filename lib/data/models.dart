@@ -809,6 +809,181 @@ class ChatMessage {
       };
 }
 
+class Transfer {
+  final int? id;
+  final String fromMethod;
+  final String toMethod;
+  final double amount;
+  final String transferDate;
+  final String notes;
+  final String? deletedAt;
+  final String createdAt;
+
+  Transfer({
+    this.id,
+    required this.fromMethod,
+    required this.toMethod,
+    required this.amount,
+    required this.transferDate,
+    this.notes = '',
+    this.deletedAt,
+    this.createdAt = '',
+  });
+
+  factory Transfer.fromMap(Map<String, dynamic> map) => Transfer(
+        id: map['id'] as int?,
+        fromMethod: map['from_method'] as String? ?? 'cash',
+        toMethod: map['to_method'] as String? ?? 'cash',
+        amount: (map['amount'] as num?)?.toDouble() ?? 0,
+        transferDate: map['transfer_date'] as String? ?? '',
+        notes: map['notes'] as String? ?? '',
+        deletedAt: map['deleted_at'] as String?,
+        createdAt: map['created_at'] as String? ?? '',
+      );
+
+  Map<String, dynamic> toMap() => {
+        if (id != null) 'id': id,
+        'from_method': fromMethod,
+        'to_method': toMethod,
+        'amount': amount,
+        'transfer_date': transferDate,
+        'notes': notes,
+        'deleted_at': deletedAt,
+      };
+}
+
+/// A record of money lent to someone (owed_to_me) or borrowed from someone
+/// (owed_by_me). Grouped by person in the Money Owed screen.
+class Debt {
+  final int? id;
+  final String person;
+  final String direction;
+  final double amount;
+  final String description;
+  final double paidAmount;
+  final String? dueDate;
+  final String status;
+  final String? deletedAt;
+  final String createdAt;
+
+  Debt({
+    this.id,
+    required this.person,
+    this.direction = 'owed_to_me',
+    required this.amount,
+    this.description = '',
+    this.paidAmount = 0,
+    this.dueDate,
+    this.status = 'active',
+    this.deletedAt,
+    this.createdAt = '',
+  });
+
+  double get remainingAmount =>
+      (amount - paidAmount).clamp(0, double.infinity).toDouble();
+
+  bool get isFullyPaid => remainingAmount <= 0;
+
+  factory Debt.fromMap(Map<String, dynamic> map) => Debt(
+        id: map['id'] as int?,
+        person: map['person'] as String? ?? '',
+        direction: map['direction'] as String? ?? 'owed_to_me',
+        amount: (map['amount'] as num?)?.toDouble() ?? 0,
+        description: map['description'] as String? ?? '',
+        paidAmount: (map['paid_amount'] as num?)?.toDouble() ?? 0,
+        dueDate: map['due_date'] as String?,
+        status: map['status'] as String? ?? 'active',
+        deletedAt: map['deleted_at'] as String?,
+        createdAt: map['created_at'] as String? ?? '',
+      );
+
+  Map<String, dynamic> toMap() => {
+        if (id != null) 'id': id,
+        'person': person,
+        'direction': direction,
+        'amount': amount,
+        'description': description,
+        'paid_amount': paidAmount,
+        'due_date': dueDate,
+        'status': status,
+        'deleted_at': deletedAt,
+      };
+}
+
+/// A single scheduled money movement used by the cash-flow forecast.
+/// Positive amounts are income, negative amounts are expenses/obligations.
+class CashFlowEvent {
+  final DateTime date;
+  final String title;
+  final double amount;
+  final String kind;
+  final String? methodCode;
+
+  CashFlowEvent({
+    required this.date,
+    required this.title,
+    required this.amount,
+    required this.kind,
+    this.methodCode,
+  });
+
+  bool get isIncome => amount > 0;
+}
+
+class AffordabilityResult {
+  final double amount;
+  final double currentBalance;
+  final double projectedLowest;
+  final double projectedEnd;
+  final List<CashFlowEvent> events;
+
+  AffordabilityResult({
+    required this.amount,
+    required this.currentBalance,
+    required this.projectedLowest,
+    required this.projectedEnd,
+    required this.events,
+  });
+
+  bool get affordable => projectedLowest >= 0;
+}
+
+class GlobalSearchResults {
+  List<Expense> expenses = [];
+  List<Income> incomes = [];
+  List<Transfer> transfers = [];
+  List<MapEntry<String, dynamic>> accounts = [];
+  List<Loan> loans = [];
+  List<SavingsGoal> goals = [];
+  List<Budget> budgets = [];
+  List<RecurringTransaction> recurring = [];
+  List<Category> categories = [];
+
+  GlobalSearchResults();
+
+  bool get isEmpty =>
+      expenses.isEmpty &&
+      incomes.isEmpty &&
+      transfers.isEmpty &&
+      accounts.isEmpty &&
+      loans.isEmpty &&
+      goals.isEmpty &&
+      budgets.isEmpty &&
+      recurring.isEmpty &&
+      categories.isEmpty;
+
+  int get totalCount =>
+      expenses.length +
+      incomes.length +
+      transfers.length +
+      accounts.length +
+      loans.length +
+      goals.length +
+      budgets.length +
+      recurring.length +
+      categories.length;
+}
+
 String _flagForCountry(String code) {
   const flags = {
     'PH': '🇵🇭', 'US': '🇺🇸', 'GB': '🇬🇧', 'CA': '🇨🇦', 'AU': '🇦🇺', 'JP': '🇯🇵', 'IN': '🇮🇳',

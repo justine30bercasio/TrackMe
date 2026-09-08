@@ -1,3 +1,6 @@
+import 'dart:convert';
+
+import 'package:crypto/crypto.dart';
 import 'package:flutter/material.dart';
 import 'package:sqflite/sqflite.dart';
 
@@ -17,6 +20,12 @@ class AppState extends ChangeNotifier {
   List<AppNotification> _notifications = [];
   int _dataVersion = 0;
 
+  // Security state.
+  bool _pinEnabled = false;
+  String? _pinHash;
+  bool _unlocked = true;
+  bool _hideBalances = false;
+
   AppUser get user => _user;
   bool get darkMode => _darkMode;
   bool get initialized => _initialized;
@@ -24,6 +33,10 @@ class AppState extends ChangeNotifier {
   List<AppNotification> get notifications => _notifications;
   String get currencyCode => _user.preferredCurrency;
   int get dataVersion => _dataVersion;
+
+  bool get pinEnabled => _pinEnabled;
+  bool get requiresLock => _pinEnabled && !_unlocked;
+  bool get hideBalances => _hideBalances;
 
   void bumpData() {
     _dataVersion++;
@@ -33,10 +46,67 @@ class AppState extends ChangeNotifier {
   Future<void> init() async {
     _user = await _repository.getUser();
     _darkMode = await _loadDarkPref();
+    await _loadSecuritySettings();
     try {
       await _repository.generateLoanDueNotifications();
     } catch (_) {}
     _initialized = true;
+    notifyListeners();
+  }
+
+  Future<void> _loadSecuritySettings() async {
+    try {
+      final s = await _repository.getSecuritySettings();
+      _pinEnabled = s['pin_enabled'] == true;
+      _pinHash = s['pin_hash'] as String?;
+      _hideBalances = s['hide_balances'] == true;
+      _unlocked = !_pinEnabled;
+    } catch (_) {}
+  }
+
+  String hashPin(String pin) =>
+      sha256.convert(utf8.encode('trackme:$pin')).toString();
+
+  /// Enables the app lock with the given numeric PIN.
+  Future<void> setPin(String pin) async {
+    _pinHash = hashPin(pin);
+    _pinEnabled = true;
+    _unlocked = true;
+    await _repository.saveSecuritySettings(pinEnabled: true, pinHash: _pinHash);
+    notifyListeners();
+  }
+
+  Future<void> disablePin() async {
+    _pinEnabled = false;
+    _pinHash = null;
+    _unlocked = true;
+    await _repository.saveSecuritySettings(pinEnabled: false, pinHash: null);
+    notifyListeners();
+  }
+
+  bool checkPin(String pin) =>
+      _pinEnabled && _pinHash != null && hashPin(pin) == _pinHash;
+
+  void unlock() {
+    _unlocked = true;
+    notifyListeners();
+  }
+
+  void lock() {
+    if (_pinEnabled) {
+      _unlocked = false;
+      notifyListeners();
+    }
+  }
+
+  /// Locks on app resume when a PIN is enabled.
+  void lockIfEnabled() {
+    if (_pinEnabled) lock();
+  }
+
+  Future<void> setHideBalances(bool value) async {
+    _hideBalances = value;
+    await _repository.saveSecuritySettings(hideBalances: value);
     notifyListeners();
   }
 

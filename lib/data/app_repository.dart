@@ -232,6 +232,44 @@ class AppRepository {
   }
 
   // ---------------------------------------------------------------------
+  // Security settings (PIN + masking)
+  // ---------------------------------------------------------------------
+
+  Future<Map<String, dynamic>> getSecuritySettings() async {
+    final database = await DatabaseHelper.instance.database;
+    final rows = await database.query('app_settings',
+        where: 'key = ?', whereArgs: ['security'], limit: 1);
+    if (rows.isEmpty) {
+      return {'pin_enabled': false, 'pin_hash': null, 'hide_balances': false};
+    }
+    try {
+      return jsonDecode(rows.first['value'] as String)
+          as Map<String, dynamic>;
+    } catch (_) {
+      return {'pin_enabled': false, 'pin_hash': null, 'hide_balances': false};
+    }
+  }
+
+  Future<void> saveSecuritySettings({
+    bool? pinEnabled,
+    String? pinHash,
+    bool? hideBalances,
+  }) async {
+    final current = await getSecuritySettings();
+    final database = await DatabaseHelper.instance.database;
+    final value = jsonEncode({
+      'pin_enabled': pinEnabled ?? current['pin_enabled'] ?? false,
+      'pin_hash': pinHash ?? current['pin_hash'],
+      'hide_balances':
+          hideBalances ?? current['hide_balances'] ?? false,
+    });
+    await database.insert('app_settings', {
+      'key': 'security',
+      'value': value,
+    }, conflictAlgorithm: ConflictAlgorithm.replace);
+  }
+
+  // ---------------------------------------------------------------------
   // Categories
   // ---------------------------------------------------------------------
 
@@ -1899,7 +1937,8 @@ class AppRepository {
   }
 
   /// Net balance and transaction count per payment method (account),
-  /// computed as income - expenses. Grouped by SQL for large datasets.
+  /// computed as income - expenses + transfers in - transfers out.
+  /// Grouped by SQL for large datasets.
   Future<Map<String, PaymentMethodStat>> paymentMethodStats() async {
     final database = await DatabaseHelper.instance.database;
     final map = <String, PaymentMethodStat>{};
@@ -1919,7 +1958,496 @@ class AppRepository {
         (cur?.count ?? 0) + (r['c'] as num).toInt(),
       );
     }
+    // Transfers: money out of one account into another.
+    final outRows = await database.rawQuery(
+        'SELECT from_method AS pm, COALESCE(SUM(amount),0) AS t, COUNT(*) AS c FROM transfers WHERE deleted_at IS NULL GROUP BY from_method');
+    for (final r in outRows) {
+      final pm = r['pm'] as String? ?? 'other';
+      final cur = map[pm];
+      map[pm] = PaymentMethodStat(
+        (cur?.balance ?? 0) - (r['t'] as num).toDouble(),
+        (cur?.count ?? 0) + (r['c'] as num).toInt(),
+      );
+    }
+    final inRows = await database.rawQuery(
+        'SELECT to_method AS pm, COALESCE(SUM(amount),0) AS t, COUNT(*) AS c FROM transfers WHERE deleted_at IS NULL GROUP BY to_method');
+    for (final r in inRows) {
+      final pm = r['pm'] as String? ?? 'other';
+      final cur = map[pm];
+      map[pm] = PaymentMethodStat(
+        (cur?.balance ?? 0) + (r['t'] as num).toDouble(),
+        (cur?.count ?? 0) + (r['c'] as num).toInt(),
+      );
+    }
     return map;
+  }
+
+  // ---------------------------------------------------------------------
+  // Transfers
+  // ---------------------------------------------------------------------
+
+  /// Creates a transfer between two accounts.
+  ///
+  /// Transfers are recorded in their own table so they never count as
+  /// income or expense in reports and totals.
+  Future<int> addTransfer({
+    required String fromMethod,
+    required String toMethod,
+    required double amount,
+    required String transferDate,
+    String notes = '',
+  }) async {
+    final database = await DatabaseHelper.instance.database;
+    if (fromMethod == toMethod) {
+      throw ArgumentError('Cannot transfer between the same account.');
+    }
+    if (amount <= 0) {
+      throw ArgumentError('Transfer amount must be greater than zero.');
+    }
+    final now = nowIso();
+    final id = await database.insert('transfers', {
+      'from_method': fromMethod,
+      'to_method': toMethod,
+      'amount': amount,
+      'transfer_date': transferDate,
+      'notes': notes,
+      'created_at': now,
+      'updated_at': now,
+    });
+    await database.insert('activity_log', {
+      'log_name': 'transfer',
+      'description': 'Transferred $amount from $fromMethod to $toMethod',
+      'created_at': now,
+    });
+    return id;
+  }
+
+  Future<void> updateTransfer(int id,
+      {String? fromMethod,
+      String? toMethod,
+      double? amount,
+      String? transferDate,
+      String? notes}) async {
+    final database = await DatabaseHelper.instance.database;
+    final data = <String, dynamic>{
+      'updated_at': nowIso(),
+      if (fromMethod != null) 'from_method': fromMethod,
+      if (toMethod != null) 'to_method': toMethod,
+      if (amount != null) 'amount': amount,
+      if (transferDate != null) 'transfer_date': transferDate,
+      if (notes != null) 'notes': notes,
+    };
+    await database.update('transfers', data, where: 'id = ?', whereArgs: [id]);
+  }
+
+  Future<void> deleteTransfer(int id) async {
+    final database = await DatabaseHelper.instance.database;
+    await database.update('transfers', {'deleted_at': nowIso()},
+        where: 'id = ?', whereArgs: [id]);
+  }
+
+  Future<void> restoreTransfer(int id) async {
+    final database = await DatabaseHelper.instance.database;
+    await database.update('transfers', {'deleted_at': null},
+        where: 'id = ?', whereArgs: [id]);
+  }
+
+  Future<void> deleteTransferPermanently(int id) async {
+    final database = await DatabaseHelper.instance.database;
+    await database.delete('transfers', where: 'id = ?', whereArgs: [id]);
+  }
+
+  Future<List<Transfer>> getTransfers({
+    String? fromMethod,
+    String? toMethod,
+    bool withTrashed = false,
+    int? limit,
+  }) async {
+    final database = await DatabaseHelper.instance.database;
+    final conditions = <String>[];
+    final args = <Object>[];
+    if (!withTrashed) conditions.add('deleted_at IS NULL');
+    if (fromMethod != null) {
+      conditions.add('from_method = ?');
+      args.add(fromMethod);
+    }
+    if (toMethod != null) {
+      conditions.add('to_method = ?');
+      args.add(toMethod);
+    }
+    final rows = await database.query(
+      'transfers',
+      where: conditions.isEmpty ? null : conditions.join(' AND '),
+      whereArgs: args.isEmpty ? null : args,
+      orderBy: 'transfer_date DESC, id DESC',
+      limit: limit,
+    );
+    return rows.map(Transfer.fromMap).toList();
+  }
+
+  Future<List<Transfer>> getTransfersForMethod(String methodCode) async {
+    final database = await DatabaseHelper.instance.database;
+    final rows = await database.query(
+      'transfers',
+      where: '(from_method = ? OR to_method = ?) AND deleted_at IS NULL',
+      whereArgs: [methodCode, methodCode],
+      orderBy: 'transfer_date DESC, id DESC',
+    );
+    return rows.map(Transfer.fromMap).toList();
+  }
+
+  // ---------------------------------------------------------------------
+  // Money owed (debts)
+  // ---------------------------------------------------------------------
+
+  Future<int> addDebt({
+    required String person,
+    required String direction,
+    required double amount,
+    String description = '',
+    String? dueDate,
+  }) async {
+    final database = await DatabaseHelper.instance.database;
+    final now = nowIso();
+    return database.insert('debts', {
+      'person': person,
+      'direction': direction,
+      'amount': amount,
+      'description': description,
+      'paid_amount': 0,
+      'due_date': dueDate,
+      'status': 'active',
+      'created_at': now,
+      'updated_at': now,
+    });
+  }
+
+  Future<void> updateDebt(int id,
+      {String? person,
+      String? direction,
+      double? amount,
+      String? description,
+      String? dueDate,
+      String? status}) async {
+    final database = await DatabaseHelper.instance.database;
+    final data = <String, dynamic>{
+      'updated_at': nowIso(),
+      if (person != null) 'person': person,
+      if (direction != null) 'direction': direction,
+      if (amount != null) 'amount': amount,
+      if (description != null) 'description': description,
+      if (dueDate != null) 'due_date': dueDate,
+      if (status != null) 'status': status,
+    };
+    await database.update('debts', data, where: 'id = ?', whereArgs: [id]);
+  }
+
+  Future<void> deleteDebt(int id) async {
+    final database = await DatabaseHelper.instance.database;
+    await database.update('debts', {'deleted_at': nowIso()},
+        where: 'id = ?', whereArgs: [id]);
+  }
+
+  /// Records a payment towards a debt and completes it when fully paid.
+  Future<void> recordDebtPayment(int id, double amount) async {
+    final database = await DatabaseHelper.instance.database;
+    final rows = await database.query('debts',
+        where: 'id = ? AND deleted_at IS NULL', whereArgs: [id]);
+    if (rows.isEmpty) return;
+    final debt = Debt.fromMap(rows.first);
+    final newPaid = debt.paidAmount + amount;
+    final status = newPaid >= debt.amount ? 'paid' : 'active';
+    await database.update('debts', {
+      'paid_amount': newPaid,
+      'status': status,
+      'updated_at': nowIso(),
+    }, where: 'id = ?', whereArgs: [id]);
+  }
+
+  Future<List<Debt>> getDebts({
+    String? direction,
+    bool onlyActive = true,
+    bool withTrashed = false,
+  }) async {
+    final database = await DatabaseHelper.instance.database;
+    final conditions = <String>[];
+    final args = <Object>[];
+    if (!withTrashed) conditions.add('deleted_at IS NULL');
+    if (onlyActive) conditions.add("status IN ('active','paid')");
+    if (direction != null) {
+      conditions.add('direction = ?');
+      args.add(direction);
+    }
+    final rows = await database.query(
+      'debts',
+      where: conditions.isEmpty ? null : conditions.join(' AND '),
+      whereArgs: args.isEmpty ? null : args,
+      orderBy: 'person COLLATE NOCASE ASC, id DESC',
+    );
+    return rows.map(Debt.fromMap).toList();
+  }
+
+  Future<Map<String, double>> debtTotals() async {
+    final database = await DatabaseHelper.instance.database;
+    final map = <String, double>{'owed_to_me': 0, 'owed_by_me': 0};
+    final rows = await database.rawQuery(
+        "SELECT direction, COALESCE(SUM(amount - paid_amount),0) AS t FROM debts WHERE deleted_at IS NULL AND status != 'paid' GROUP BY direction");
+    for (final r in rows) {
+      map[r['direction'] as String? ?? ''] = (r['t'] as num).toDouble();
+    }
+    return map;
+  }
+
+  // ---------------------------------------------------------------------
+  // Cash-flow forecast
+  // ---------------------------------------------------------------------
+
+  /// Current total balance across all payment methods.
+  Future<double> totalBalance() async {
+    final stats = await paymentMethodStats();
+    var total = 0.0;
+    for (final s in stats.values) {
+      total += s.balance;
+    }
+    return total;
+  }
+
+  DateTime _advanceRecurringDate(DateTime d, String frequency) {
+    switch (frequency) {
+      case 'daily':
+        return DateTime(d.year, d.month, d.day + 1);
+      case 'weekly':
+        return DateTime(d.year, d.month, d.day + 7);
+      case 'biweekly':
+        return DateTime(d.year, d.month, d.day + 14);
+      case 'quarterly':
+        return DateTime(d.year, d.month + 3, d.day);
+      case 'yearly':
+        return DateTime(d.year + 1, d.month, d.day);
+      case 'monthly':
+      default:
+        return DateTime(d.year, d.month + 1, d.day);
+    }
+  }
+
+  /// Projects scheduled money movements for the next [days] days.
+  /// Combines recurring transactions, upcoming loan payments and
+  /// outcome debts due within the window.
+  Future<List<CashFlowEvent>> getCashFlowForecast({int days = 45}) async {
+    final database = await DatabaseHelper.instance.database;
+    final today = DateTime.now();
+    final start = DateTime(today.year, today.month, today.day);
+    final end = DateTime(start.year, start.month, start.day + days);
+    final events = <CashFlowEvent>[];
+
+    // 1. Recurring transactions (expenses).
+    final recRows = await database.query('recurring_transactions',
+        where: "status = 'active' AND deleted_at IS NULL AND next_due_date <= ?",
+        whereArgs: [_toDateStr(end)]);
+    for (final r in recRows) {
+      final rt = RecurringTransaction.fromMap(r);
+      // Work back from today to find the next occurrence >= start.
+      var date = DateTime.tryParse(rt.nextDueDate)?.toLocal() ?? start;
+      var guard = 0;
+      while ((date.isBefore(start)) && guard < 400) {
+        date = _advanceRecurringDate(date, rt.frequency);
+        guard++;
+      }
+      guard = 0;
+      while (!date.isAfter(end) && guard < 4000) {
+        events.add(CashFlowEvent(
+          date: date,
+          title: rt.description,
+          amount: -rt.amount,
+          kind: 'recurring',
+          methodCode: rt.paymentMethod,
+        ));
+        date = _advanceRecurringDate(date, rt.frequency);
+        guard++;
+        if (rt.endDate != null &&
+            DateTime.tryParse(rt.endDate!) != null &&
+            date.isAfter(DateTime.tryParse(rt.endDate!)!)) {
+          break;
+        }
+        if (rt.maxOccurrences != null &&
+            guard >= (rt.maxOccurrences! - rt.occurrencesGenerated)) {
+          break;
+        }
+      }
+    }
+
+    // 2. Upcoming loan payments.
+    final loanRows = await database.rawQuery('''
+      SELECT lp.*, l.name AS loan_name
+      FROM loan_payments lp
+      JOIN user_loans l ON l.id = lp.loan_id
+      WHERE lp.status = 'upcoming'
+        AND lp.due_date >= ? AND lp.due_date <= ?
+        AND l.deleted_at IS NULL AND l.paid_off = 0
+    ''', [_toDateStr(start), _toDateStr(end)]);
+    for (final r in loanRows) {
+      final due = DateTime.tryParse(r['due_date'] as String? ?? '');
+      if (due == null) continue;
+      events.add(CashFlowEvent(
+        date: due,
+        title: (r['loan_name'] as String? ?? 'Loan') + ' payment',
+        amount: -((r['amount_due'] as num).toDouble()),
+        kind: 'loan',
+      ));
+    }
+
+    // 3. Debts I owe (obligations) and debts owed to me (receivables).
+    final debtRows = await database.query('debts',
+        where:
+            "deleted_at IS NULL AND status != 'paid' AND due_date IS NOT NULL AND due_date != '' AND direction = 'owed_by_me' AND due_date >= ? AND due_date <= ?",
+        whereArgs: [_toDateStr(start), _toDateStr(end)]);
+    for (final r in debtRows) {
+      final d = Debt.fromMap(r);
+      final due = DateTime.tryParse(d.dueDate ?? '');
+      if (due == null) continue;
+      events.add(CashFlowEvent(
+        date: due,
+        title: '${d.person} (debt)',
+        amount: -d.remainingAmount,
+        kind: 'debt',
+      ));
+    }
+    final owedToMeRows = await database.query('debts',
+        where:
+            "deleted_at IS NULL AND status != 'paid' AND due_date IS NOT NULL AND due_date != '' AND direction = 'owed_to_me' AND due_date >= ? AND due_date <= ?",
+        whereArgs: [_toDateStr(start), _toDateStr(end)]);
+    for (final r in owedToMeRows) {
+      final d = Debt.fromMap(r);
+      final due = DateTime.tryParse(d.dueDate ?? '');
+      if (due == null) continue;
+      events.add(CashFlowEvent(
+        date: due,
+        title: '${d.person} pays you',
+        amount: d.remainingAmount,
+        kind: 'debt',
+      ));
+    }
+
+    events.sort((a, b) => a.date.compareTo(b.date));
+    return events;
+  }
+
+  /// Checks whether spending [amount] now would still keep the projected
+  /// running balance above zero for the next [days] days.
+  Future<AffordabilityResult> checkAffordability(double amount,
+      {int days = 45}) async {
+    final balance = await totalBalance();
+    final events = await getCashFlowForecast(days: days);
+    final hypothetical = DateTime.now();
+    final sorted = <CashFlowEvent>[
+      CashFlowEvent(
+          date: hypothetical,
+          title: 'This purchase',
+          amount: -amount,
+          kind: 'custom'),
+      ...events,
+    ]..sort((a, b) => a.date.compareTo(b.date));
+
+    var running = balance - amount;
+    var lowest = running;
+    for (final e in sorted) {
+      running += e.amount;
+      if (running < lowest) lowest = running;
+    }
+    return AffordabilityResult(
+      amount: amount,
+      currentBalance: balance,
+      projectedLowest: lowest,
+      projectedEnd: running,
+      events: sorted,
+    );
+  }
+
+  String _toDateStr(DateTime d) =>
+      '${d.year.toString().padLeft(4, '0')}-${d.month.toString().padLeft(2, '0')}-${d.day.toString().padLeft(2, '0')}';
+
+  // ---------------------------------------------------------------------
+  // Global search
+  // ---------------------------------------------------------------------
+
+  Future<GlobalSearchResults> globalSearch(String query) async {
+    final database = await DatabaseHelper.instance.database;
+    final term = query.trim().toLowerCase();
+    if (term.isEmpty) return GlobalSearchResults();
+    final like = '%$term%';
+    final results = GlobalSearchResults();
+
+    final expenseRows = await database.rawQuery('''
+      SELECT e.*, c.name AS category_name, c.color AS category_color
+      FROM expenses e
+      LEFT JOIN categories c ON c.id = e.category_id
+      WHERE e.deleted_at IS NULL
+        AND (LOWER(e.description) LIKE ? OR LOWER(e.notes) LIKE ? OR CAST(e.amount AS TEXT) LIKE ?)
+      LIMIT 100
+    ''', [like, like, like]);
+    results.expenses = expenseRows.map(Expense.fromMap).toList();
+
+    final incomeRows = await database.rawQuery('''
+      SELECT * FROM income
+      WHERE deleted_at IS NULL
+        AND (LOWER(source) LIKE ? OR LOWER(notes) LIKE ? OR CAST(amount AS TEXT) LIKE ?)
+      LIMIT 100
+    ''', [like, like, like]);
+    results.incomes = incomeRows.map(Income.fromMap).toList();
+
+    final transferRows = await database.rawQuery('''
+      SELECT * FROM transfers
+      WHERE deleted_at IS NULL
+        AND (LOWER(notes) LIKE ? OR LOWER(from_method) LIKE ? OR LOWER(to_method) LIKE ? OR CAST(amount AS TEXT) LIKE ?)
+      LIMIT 100
+    ''', [like, like, like, like]);
+    results.transfers = transferRows.map(Transfer.fromMap).toList();
+
+    final catRows = await database.query('categories',
+        where: 'LOWER(name) LIKE ?', whereArgs: [like], limit: 50);
+    results.categories = catRows.map(Category.fromMap).toList();
+
+    // Accounts: match by payment method label.
+    final stats = await paymentMethodStats();
+    final accountEntries = <MapEntry<String, dynamic>>[];
+    for (final entry in stats.entries) {
+      if (paymentMethodLabel(entry.key).toLowerCase().contains(term)) {
+        accountEntries.add(entry);
+      }
+    }
+    results.accounts = accountEntries;
+
+    final loanRows = await database.query('user_loans',
+        where:
+            'deleted_at IS NULL AND (LOWER(name) LIKE ? OR LOWER(lender) LIKE ?)',
+        whereArgs: [like, like],
+        limit: 50);
+    results.loans = loanRows.map(Loan.fromMap).toList();
+
+    final goalRows = await database.query('savings_goals',
+        where:
+            'deleted_at IS NULL AND (LOWER(title) LIKE ? OR LOWER(description) LIKE ?)',
+        whereArgs: [like, like],
+        limit: 50);
+    results.goals = goalRows.map(SavingsGoal.fromMap).toList();
+
+    final budgetRows = await database.rawQuery('''
+      SELECT b.*, c.name AS category_name, c.color AS category_color
+      FROM budgets b
+      LEFT JOIN categories c ON c.id = b.category_id
+      WHERE LOWER(COALESCE(c.name, '')) LIKE ?
+      LIMIT 50
+    ''', [like]);
+    results.budgets = budgetRows.map(Budget.fromMap).toList();
+
+    final recurringRows = await database.query('recurring_transactions',
+        where: 'deleted_at IS NULL AND LOWER(description) LIKE ?',
+        whereArgs: [like],
+        limit: 50);
+    results.recurring =
+        recurringRows.map(RecurringTransaction.fromMap).toList();
+
+    return results;
   }
 
   // ---------------------------------------------------------------------

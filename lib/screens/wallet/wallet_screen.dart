@@ -51,6 +51,7 @@ class WalletScreen extends StatelessWidget {
           }
           final stats = snapshot.data!;
           final currency = context.watch<AppState>().currencyCode;
+          final hide = context.watch<AppState>().hideBalances;
           if (stats.isEmpty) {
             return EmptyState(
               icon: Icons.account_balance_wallet_outlined,
@@ -86,7 +87,7 @@ class WalletScreen extends StatelessWidget {
                               color: AppColors.onHeroMuted, fontSize: 13)),
                       const SizedBox(height: 4),
                       Text(
-                        formatMoney(total, currency),
+                        visibleOrMasked(total, currency, hide),
                         style: const TextStyle(
                             color: AppColors.onHero,
                             fontSize: 30,
@@ -139,6 +140,7 @@ class _AccountTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final label = paymentMethodLabel(code);
+    final hide = context.watch<AppState>().hideBalances;
     final color = stat.balance > 0
         ? AppColors.income
         : stat.balance < 0
@@ -174,7 +176,7 @@ class _AccountTile extends StatelessWidget {
           ),
           const SizedBox(width: 8),
           Text(
-            formatMoney(stat.balance, currency),
+            visibleOrMasked(stat.balance, currency, hide),
             style: TextStyle(
                 color: color, fontSize: 14, fontWeight: FontWeight.w800),
             maxLines: 1,

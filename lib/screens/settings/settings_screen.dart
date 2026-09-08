@@ -16,6 +16,11 @@ import 'package:track_me/screens/loans/loans_screen.dart';
 import 'package:track_me/screens/profile/profile_screen.dart';
 import 'package:track_me/screens/receipts/scan_receipt_screen.dart';
 import 'package:track_me/screens/recurring/recurring_list_screen.dart';
+import 'package:track_me/screens/forecast/cash_flow_screen.dart';
+import 'package:track_me/screens/debts/money_owed_screen.dart';
+import 'package:track_me/screens/search/search_screen.dart';
+import 'package:track_me/screens/security/security_screen.dart';
+import 'package:track_me/screens/transfers/transfers_list_screen.dart';
 
 class SettingsScreen extends StatelessWidget {
   const SettingsScreen({super.key});
@@ -67,6 +72,21 @@ class SettingsScreen extends StatelessWidget {
           ),
           const SizedBox(height: 20),
           _SectionTileGroup(
+            title: 'Security',
+            children: [
+              _SettingsTile(
+                icon: Icons.lock_outline,
+                title: 'App lock & privacy',
+                subtitle: state.pinEnabled
+                    ? 'PIN lock enabled'
+                    : 'PIN lock, hide balances, privacy',
+                onTap: () => Navigator.of(context).push(MaterialPageRoute(
+                    builder: (_) => const SecurityScreen())),
+              ),
+            ],
+          ),
+          const SizedBox(height: 20),
+          _SectionTileGroup(
             title: 'Manage',
             children: [
               _SettingsTile(
@@ -78,6 +98,13 @@ class SettingsScreen extends StatelessWidget {
                       const RouteSettings(name: AssistantScreen.routeName),
                   builder: (_) => const AssistantScreen(),
                 )),
+              ),
+              _SettingsTile(
+                icon: Icons.search,
+                title: 'Search',
+                subtitle: 'Find anything in your finances',
+                onTap: () => Navigator.of(context).push(MaterialPageRoute(
+                    builder: (_) => const SearchScreen())),
               ),
               _SettingsTile(
                 icon: Icons.document_scanner_outlined,
@@ -120,6 +147,27 @@ class SettingsScreen extends StatelessWidget {
                 subtitle: 'Repayment schedules aligned to your salary',
                 onTap: () => Navigator.of(context).push(
                     MaterialPageRoute(builder: (_) => const LoansScreen())),
+              ),
+              _SettingsTile(
+                icon: Icons.swap_horiz,
+                title: 'Transfers',
+                subtitle: 'Move money between your accounts',
+                onTap: () => Navigator.of(context).push(MaterialPageRoute(
+                    builder: (_) => const TransfersListScreen())),
+              ),
+              _SettingsTile(
+                icon: Icons.handshake_outlined,
+                title: 'Money owed',
+                subtitle: 'Track money lent and borrowed',
+                onTap: () => Navigator.of(context).push(MaterialPageRoute(
+                    builder: (_) => const MoneyOwedScreen())),
+              ),
+              _SettingsTile(
+                icon: Icons.query_stats_outlined,
+                title: 'Cash-flow forecast',
+                subtitle: 'See what\'s coming and what you can afford',
+                onTap: () => Navigator.of(context).push(MaterialPageRoute(
+                    builder: (_) => const CashFlowScreen())),
               ),
             ],
           ),

@@ -10,6 +10,19 @@ class DatabaseHelper {
 
   static Database? _db;
 
+  /// When true, the database opens against an in-memory store. Intended
+  /// for tests so they never touch the real on-device database file.
+  static bool useInMemoryDatabase = false;
+
+  static Future<void> reset() async {
+    if (_db != null) {
+      try {
+        await _db!.close();
+      } catch (_) {}
+      _db = null;
+    }
+  }
+
   Future<Database> get database async {
     if (_db != null) return _db!;
     _db = await _open();
@@ -25,6 +38,33 @@ class DatabaseHelper {
       factory = databaseFactory;
     }
 
+    if (useInMemoryDatabase) {
+      return factory.openDatabase(
+        inMemoryDatabasePath,
+        options: OpenDatabaseOptions(
+          version: 5,
+          onCreate: (db, version) async {
+            await _createTables(db);
+            await _seed(db);
+          },
+          onUpgrade: (db, oldVersion, newVersion) async {
+            if (oldVersion < 2) {
+              await _createLoanTables(db);
+            }
+            if (oldVersion < 3) {
+              await _createChatTables(db);
+            }
+            if (oldVersion < 4) {
+              await _createTransferTables(db);
+            }
+            if (oldVersion < 5) {
+              await _createDebtTables(db);
+            }
+          },
+        ),
+      );
+    }
+
     Directory dir;
     try {
       dir = await getApplicationDocumentsDirectory();
@@ -35,7 +75,7 @@ class DatabaseHelper {
     return factory.openDatabase(
       path,
       options: OpenDatabaseOptions(
-        version: 3,
+        version: 5,
         onCreate: (db, version) async {
           await _createTables(db);
           await _seed(db);
@@ -46,6 +86,12 @@ class DatabaseHelper {
           }
           if (oldVersion < 3) {
             await _createChatTables(db);
+          }
+          if (oldVersion < 4) {
+            await _createTransferTables(db);
+          }
+          if (oldVersion < 5) {
+            await _createDebtTables(db);
           }
         },
       ),
@@ -250,6 +296,8 @@ class DatabaseHelper {
 
     await _createLoanTables(db);
     await _createChatTables(db);
+    await _createTransferTables(db);
+    await _createDebtTables(db);
   }
 
   Future<void> _createLoanTables(Database db) async {
@@ -305,6 +353,47 @@ class DatabaseHelper {
     ''');
 
     await db.execute('CREATE INDEX IF NOT EXISTS idx_chat_messages_created ON chat_messages (created_at)');
+  }
+
+  Future<void> _createTransferTables(Database db) async {
+    await db.execute('''
+      CREATE TABLE IF NOT EXISTS transfers (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        from_method TEXT NOT NULL,
+        to_method TEXT NOT NULL,
+        amount REAL NOT NULL,
+        transfer_date TEXT NOT NULL,
+        notes TEXT,
+        created_at TEXT,
+        updated_at TEXT,
+        deleted_at TEXT
+      )
+    ''');
+
+    await db.execute('CREATE INDEX IF NOT EXISTS idx_transfers_date ON transfers (transfer_date)');
+    await db.execute('CREATE INDEX IF NOT EXISTS idx_transfers_from ON transfers (from_method)');
+    await db.execute('CREATE INDEX IF NOT EXISTS idx_transfers_to ON transfers (to_method)');
+  }
+
+  Future<void> _createDebtTables(Database db) async {
+    await db.execute('''
+      CREATE TABLE IF NOT EXISTS debts (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        person TEXT NOT NULL,
+        direction TEXT NOT NULL,
+        amount REAL NOT NULL,
+        description TEXT,
+        paid_amount REAL DEFAULT 0,
+        due_date TEXT,
+        status TEXT DEFAULT 'active',
+        created_at TEXT,
+        updated_at TEXT,
+        deleted_at TEXT
+      )
+    ''');
+
+    await db.execute('CREATE INDEX IF NOT EXISTS idx_debts_person ON debts (person)');
+    await db.execute('CREATE INDEX IF NOT EXISTS idx_debts_direction ON debts (direction)');
   }
 
   Future<void> _seed(Database db) async {

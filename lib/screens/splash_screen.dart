@@ -2,7 +2,6 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:video_player/video_player.dart';
 
 import 'package:track_me/core/theme.dart';
 import 'package:track_me/data/database_helper.dart';
@@ -17,56 +16,28 @@ class SplashScreen extends StatefulWidget {
   State<SplashScreen> createState() => _SplashScreenState();
 }
 
-class _SplashScreenState extends State<SplashScreen> {
-  VideoPlayerController? _controller;
-  bool _videoReady = false;
+class _SplashScreenState extends State<SplashScreen>
+    with SingleTickerProviderStateMixin {
+  bool _readyToNavigate = false;
   bool _navigated = false;
+
+  late final AnimationController _pulse;
 
   @override
   void initState() {
     super.initState();
-    _initVideo();
+    _pulse = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 1200),
+    )..repeat(reverse: true);
     _bootstrap();
-  }
-
-  void _initVideo() {
-    final c = VideoPlayerController.asset('assets/video/Loading_screen.mp4');
-    _controller = c;
-    c
-      ..setLooping(false)
-      ..initialize().then((_) {
-        if (!mounted) return;
-        setState(() => _videoReady = true);
-        c.play();
-        c.addListener(_onVideoProgress);
-      }).catchError((_) {
-        if (!mounted) return;
-        setState(() => _videoReady = false);
-        _videoFinished = true;
-        if (_readyToNavigate) _navigate();
-      });
-  }
-
-  void _onVideoProgress() {
-    final c = _controller;
-    if (c == null || !c.value.isInitialized) return;
-    final pos = c.value.position;
-    final dur = c.value.duration;
-    if (pos >= dur) {
-      _videoFinished = true;
-      if (_readyToNavigate) _navigate();
-    }
   }
 
   @override
   void dispose() {
-    _controller?.removeListener(_onVideoProgress);
-    _controller?.dispose();
+    _pulse.dispose();
     super.dispose();
   }
-
-  bool _readyToNavigate = false;
-  bool _videoFinished = false;
 
   Future<void> _bootstrap() async {
     await DatabaseHelper.instance.database;
@@ -74,11 +45,11 @@ class _SplashScreenState extends State<SplashScreen> {
     final state = Provider.of<AppState>(context, listen: false);
     await state.refreshNotifications();
     _readyToNavigate = true;
-    if (_videoFinished) _navigate();
+    _navigate();
   }
 
   void _navigate() {
-    if (_navigated || !mounted) return;
+    if (_navigated || !mounted || !_readyToNavigate) return;
     _navigated = true;
     final state = Provider.of<AppState>(context, listen: false);
     final user = state.user;
@@ -94,42 +65,27 @@ class _SplashScreenState extends State<SplashScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.black,
-      body: Stack(
-        fit: StackFit.expand,
-        children: [
-          if (_videoReady)
-            VideoPlayer(_controller!)
-          else
-            const _FallbackSplash(),
-        ],
-      ),
-    );
-  }
-}
-
-class _FallbackSplash extends StatelessWidget {
-  const _FallbackSplash();
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      color: AppColors.primary,
-      child: Center(
+      backgroundColor: AppColors.primary,
+      body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Container(
-              width: 96,
-              height: 96,
-              decoration: BoxDecoration(
-                color: Colors.white.withValues(alpha: 0.18),
-                borderRadius: BorderRadius.circular(28),
-                border: Border.all(
-                    color: Colors.white.withValues(alpha: 0.35), width: 1.5),
+            FadeTransition(
+              opacity: Tween(begin: 0.7, end: 1.0).animate(
+                CurvedAnimation(parent: _pulse, curve: Curves.easeInOut),
               ),
-              child: const Icon(Icons.savings_outlined,
-                  size: 52, color: AppColors.onHero),
+              child: Container(
+                width: 96,
+                height: 96,
+                decoration: BoxDecoration(
+                  color: Colors.white.withValues(alpha: 0.18),
+                  borderRadius: BorderRadius.circular(28),
+                  border: Border.all(
+                      color: Colors.white.withValues(alpha: 0.35), width: 1.5),
+                ),
+                child: const Icon(Icons.savings_outlined,
+                    size: 52, color: AppColors.onHero),
+              ),
             ),
             const SizedBox(height: 28),
             const Text(

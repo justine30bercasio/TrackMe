@@ -77,6 +77,19 @@ class AppColors {
   }
 }
 
+/// Type-scale tokens. New screens should use these instead of ad-hoc sizes.
+class AppType {
+  AppType._();
+
+  static const double label = 12;
+  static const double body = 14;
+  static const double strong = 15;
+  static const double subhead = 16;
+  static const double title = 18;
+  static const double display = 26;
+  static const double hero = 30;
+}
+
 class AppTheme {
   AppTheme._();
 

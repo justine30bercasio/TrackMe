@@ -7,6 +7,8 @@ import 'package:track_me/core/theme.dart';
 import 'package:track_me/data/app_repository.dart';
 import 'package:track_me/providers/app_state.dart';
 import 'package:track_me/screens/assistant/assistant_overlay.dart';
+import 'package:track_me/screens/security/app_lifecycle_gate.dart';
+import 'package:track_me/screens/security/pin_lock_screen.dart';
 import 'package:track_me/screens/splash_screen.dart';
 import 'package:track_me/services/notification_service.dart';
 
@@ -37,8 +39,13 @@ class ExpenseTrackerApp extends StatelessWidget {
             themeMode: state.darkMode ? ThemeMode.dark : ThemeMode.light,
             navigatorKey: appNavigatorKey,
             navigatorObservers: [AssistantNavigatorObserver.instance],
-            builder: (context, child) => AssistantOverlay(child: child ?? const SizedBox.shrink()),
-            home: const SplashScreen(),
+            builder: (context, child) {
+              if (state.requiresLock) {
+                return const PinLockScreen();
+              }
+              return AssistantOverlay(child: child ?? const SizedBox.shrink());
+            },
+            home: const AppLifecycleGate(child: SplashScreen()),
           );
         },
       ),
