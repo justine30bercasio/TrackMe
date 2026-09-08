@@ -10,7 +10,8 @@ import 'package:track_me/providers/app_state.dart';
 
 class IncomeFormScreen extends StatefulWidget {
   final Income? income;
-  const IncomeFormScreen({super.key, this.income});
+  final String? initialPaymentMethod;
+  const IncomeFormScreen({super.key, this.income, this.initialPaymentMethod});
 
   @override
   State<IncomeFormScreen> createState() => _IncomeFormScreenState();
@@ -39,6 +40,8 @@ class _IncomeFormScreenState extends State<IncomeFormScreen> {
       _notesController.text = i.notes;
       _date = DateTime.tryParse(i.incomeDate) ?? DateTime.now();
       _paymentMethod = i.paymentMethod;
+    } else if (widget.initialPaymentMethod != null) {
+      _paymentMethod = widget.initialPaymentMethod!;
     }
     _load();
   }

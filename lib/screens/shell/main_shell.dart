@@ -6,6 +6,7 @@ import 'package:track_me/screens/insights/insights_screen.dart';
 import 'package:track_me/screens/settings/settings_screen.dart';
 import 'package:track_me/screens/transactions/quick_add_sheet.dart';
 import 'package:track_me/screens/transactions/transactions_screen.dart';
+import 'package:track_me/screens/wallet/wallet_screen.dart';
 
 class MainShell extends StatefulWidget {
   const MainShell({super.key});
@@ -21,6 +22,7 @@ class _MainShellState extends State<MainShell> {
   Widget build(BuildContext context) {
     final screens = [
       const DashboardScreen(),
+      const WalletScreen(),
       const BudgetsScreen(),
       const TransactionsScreen(),
       const InsightsScreen(),
@@ -29,7 +31,7 @@ class _MainShellState extends State<MainShell> {
 
     return Scaffold(
       body: IndexedStack(index: _index, children: screens),
-      floatingActionButton: _index == 4 ? null : const _QuickAddFab(),
+      floatingActionButton: _index == 5 ? null : const _QuickAddFab(),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
       bottomNavigationBar: NavigationBar(
         selectedIndex: _index,
@@ -39,6 +41,10 @@ class _MainShellState extends State<MainShell> {
               icon: Icon(Icons.home_outlined),
               selectedIcon: Icon(Icons.home),
               label: 'Home'),
+          NavigationDestination(
+              icon: Icon(Icons.account_balance_wallet_outlined),
+              selectedIcon: Icon(Icons.account_balance_wallet),
+              label: 'Wallet'),
           NavigationDestination(
               icon: Icon(Icons.pie_chart_outline),
               selectedIcon: Icon(Icons.pie_chart),

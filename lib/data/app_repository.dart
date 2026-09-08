@@ -164,6 +164,13 @@ class BudgetSpending {
   BudgetSpending(this.budget, this.spent);
 }
 
+/// Aggregate net balance + transaction count for a payment method (account).
+class PaymentMethodStat {
+  final double balance;
+  final int count;
+  const PaymentMethodStat(this.balance, this.count);
+}
+
 class AppRepository {
   AppRepository._();
   static final AppRepository instance = AppRepository._();
@@ -1889,6 +1896,30 @@ class AppRepository {
     final database = await DatabaseHelper.instance.database;
     final res = await database.rawQuery('SELECT COALESCE(SUM(amount),0) as t FROM income WHERE deleted_at IS NULL');
     return (res.first['t'] as num).toDouble();
+  }
+
+  /// Net balance and transaction count per payment method (account),
+  /// computed as income - expenses. Grouped by SQL for large datasets.
+  Future<Map<String, PaymentMethodStat>> paymentMethodStats() async {
+    final database = await DatabaseHelper.instance.database;
+    final map = <String, PaymentMethodStat>{};
+    final expRows = await database.rawQuery(
+        'SELECT payment_method AS pm, COALESCE(SUM(amount),0) AS t, COUNT(*) AS c FROM expenses WHERE deleted_at IS NULL GROUP BY payment_method');
+    for (final r in expRows) {
+      map[(r['pm'] as String? ?? 'other')] =
+          PaymentMethodStat(-(r['t'] as num).toDouble(), (r['c'] as num).toInt());
+    }
+    final incRows = await database.rawQuery(
+        'SELECT payment_method AS pm, COALESCE(SUM(amount),0) AS t, COUNT(*) AS c FROM income WHERE deleted_at IS NULL GROUP BY payment_method');
+    for (final r in incRows) {
+      final pm = r['pm'] as String? ?? 'other';
+      final cur = map[pm];
+      map[pm] = PaymentMethodStat(
+        (cur?.balance ?? 0) + (r['t'] as num).toDouble(),
+        (cur?.count ?? 0) + (r['c'] as num).toInt(),
+      );
+    }
+    return map;
   }
 
   // ---------------------------------------------------------------------
